@@ -177,7 +177,7 @@ class fslib(object):
                 auth['auth_header'] = auth_header
                 with open(self.credentials_file, 'w') as fh_credentials:
                     fh_credentials.write(json.JSONEncoder().encode(auth))
-                return True
+                return session_dict
         else:
             return False
 
@@ -237,6 +237,11 @@ class fslib(object):
             streams[str(bitrate)] = stream_url + '|' + urlencode(m3u8_header)
 
         return streams
+        
+    def get_entitlements(self):
+        session_dict = self.refresh_session()
+        entitlements = session_dict['user']['registration']['entitlements']
+        return entitlements
 
     def get_schedule(start_date, end_date):
         url = self.base_url + '/epg/ws/schedule'
