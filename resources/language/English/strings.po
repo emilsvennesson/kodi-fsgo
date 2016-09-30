@@ -64,3 +64,11 @@ msgstr ""
 msgctxt "#30013"
 msgid "Unable to login to your TV provider.[CR][CR]Please make sure that you have successfully activated your code on [B]foxsportsgo.com/activate[/B]."
 msgstr ""
+
+msgctxt "#30014"
+msgid "Live"
+msgstr ""
+
+msgctxt "#30015"
+msgid "Schedule"
+msgstr "

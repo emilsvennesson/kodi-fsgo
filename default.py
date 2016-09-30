@@ -60,6 +60,32 @@ def play_video(channel_id):
     else:
         dialog = xbmcgui.Dialog()
         dialog.ok(language(30005), language(30013))
+        
+def main_menu():
+    items = [language(30014), language(30015)]
+    for item in items:
+        if item == language(30014):
+            parameters = {'action': 'list_events', 'live': 'true'}
+        else:
+           parameters = {'action': 'list_schedule'} 
+        add_item(item, parameters)
+    xbmcplugin.endOfDirectory(_handle)
+    
+
+def list_events(live):
+    if live == 'true':
+        schedule = fs.get_schedule(live=True)
+    else:
+        schedule = fs.get_schedule()
+    
+    for event in schedule:
+        addon_log(event)
+        title = event['title']
+        channel_id = event['airings'][0]['channel_id']
+        parameters = {'action': 'play_video', 'channel_id': channel_id}
+        playable = True
+        add_item(title, parameters, playable=playable)
+    xbmcplugin.endOfDirectory(_handle)
 
 
 def ask_bitrate(bitrates):
@@ -127,19 +153,21 @@ def add_item(title, parameters, items=False, folder=True, playable=False, set_in
         return items
 
 
-def authenticate(reg_code=None, session_id=None, auth_header=None):
+def init(reg_code=None, session_id=None, auth_header=None):
     try:
         fs.login(session_id=session_id, auth_header=auth_header, reg_code=reg_code)
+        main_menu()
     except fs.LoginFailure as error:
         if error.value == 'No registration code supplied.' or error.value == 'No valid session found. Authorization needed.':
             reg_code = fs.get_reg_code()
             dialog = xbmcgui.Dialog()
             info_message = '%s[B]%s[/B] [CR][CR]%s' % (language(30010), reg_code, language(30011))
             dialog.ok(language(30009), info_message)
-            authenticate(reg_code)
+            init(reg_code)
         elif error.value == 'Authorization failure.':
             dialog = xbmcgui.Dialog()
             dialog.ok(language(30012), language(30013))
+            sys.exit(0)
 
 
 def router(paramstring):
@@ -148,8 +176,10 @@ def router(paramstring):
     if params:
         if params['action'] == 'play_video':
             play_video(params['channel_id'])
+        elif params['action'] == 'list_events':
+            list_events(params['live'])
     else:
-        authenticate(session_id=fs.session_id, auth_header=fs.auth_header)
+        init(session_id=fs.session_id, auth_header=fs.auth_header)
 
 
 if __name__ == '__main__':

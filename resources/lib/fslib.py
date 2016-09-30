@@ -250,14 +250,19 @@ class fslib(object):
         entitlements = session_dict['user']['registration']['entitlements']
         return entitlements
 
-    def get_schedule(start_date, end_date):
+    def get_schedule(self, start_date=None, end_date=None, live=False):
         """Retrieve the FS GO schedule in a dict."""
-        url = self.base_url + '/epg/ws/schedule'
-        payload = {
-            'start_date': start_date,
-            'end_date': end_date
-        }
-        schedule_data = self.make_request(url=url, method='get', payload=payload)
+        if live:
+            url = self.base_url + '/epg/ws/live/all'
+            payload = {}
+        else:
+            url = self.base_url + '/epg/ws/schedule'
+            payload = {
+                'start_date': start_date,
+                'end_date': end_date
+            }  
+        headers = {'Authorization': self.auth_header}
+        schedule_data = self.make_request(url=url, method='get', payload=payload, headers=headers)
         schedule_dict = json.loads(schedule_data)
         schedule = schedule_dict['body']['items']
 
