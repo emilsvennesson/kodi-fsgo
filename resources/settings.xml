@@ -1,0 +1,10 @@
+﻿<settings>
+  <category label="30006">
+    <setting id="preferred_bitrate" type="enum" label="30004" lvalues="30001|30002|30003" default="0"/>
+    <setting id="max_bitrate_allowed" type="number" label="30005" default="5000" subsetting="true" visible="eq(-1,1)"/>
+  </category>
+  <category label="30007">
+    <setting id="debug" type="bool" label="Add-on debugging" default="false"/>
+    <setting id="verify_ssl" type="bool" label="30008" default="true"/>
+  </category>
+</settings>

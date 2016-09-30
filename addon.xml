@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<addon id="plugin.video.fsgo"
+       version="1.0.0"
+       name="FOX Sports GO"
+       provider-name="emilsvennesson">
+  <requires>
+    <import addon="xbmc.python" version="2.24.0"/>
+    <import addon="script.module.requests" version="2.9.1"/>
+    <import addon="script.module.m3u8" version="0.2.10"/>
+  </requires>
+  <extension point="xbmc.python.pluginsource" library="default.py">
+    <provides>video</provides>
+  </extension>
+  <extension point="xbmc.addon.metadata">
+    <description lang="en">Watch content from FOX Sports GO.</description>
+    <platform>all</platform>
+    <license>GNU GENERAL PUBLIC LICENSE. Version 3, 29 June 2007</license>
+    <source>https://github.com/emilsvennesson/kodi-fsgo</source>
+    <disclaimer>This addon requires you to have a subscription to one of FOX Sports GO's participating TV providers.[CR]This addon is completely unofficial and is not endorsed by Fox in any way.</disclaimer>
+  </extension>
+</addon>
