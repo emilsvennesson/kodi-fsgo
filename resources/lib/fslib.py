@@ -122,7 +122,7 @@ class fslib(object):
         session['device'] = {}
         session['location'] = {}
         session['device']['token'] = access_token
-        session['device']['platform'] = 'android_phone'
+        session['device']['platform'] = 'ios-tablet'
         session['location']['latitude'] = '0'
         session['location']['longitude'] = '0'
         post_data = json.JSONEncoder().encode(session)
