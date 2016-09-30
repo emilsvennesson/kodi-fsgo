@@ -207,7 +207,7 @@ class fslib(object):
 
     def get_stream_url(self, channel_id):
         stream_url = {}
-        url = self.base_url + '/platform/web/channel/%s' % channel_id
+        url = self.base_url + '/platform/ios-tablet~3.0.3/channel/%s' % channel_id
         headers = {
             'Accept': 'application/vnd.media-service+json; version=1',
             'Authorization': self.auth_header
