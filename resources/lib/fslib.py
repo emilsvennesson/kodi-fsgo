@@ -45,12 +45,12 @@ class fslib(object):
     def log(self, string):
         if self.debug:
             try:
-                print '[fsgolib]: %s' % string
+                print '[fslib]: %s' % string
             except UnicodeEncodeError:
                 # we can't anticipate everything in unicode they might throw at
                 # us, but we can handle a simple BOM
                 bom = unicode(codecs.BOM_UTF8, 'utf8')
-                print '[fsgolib]: %s' % string.replace(bom, '')
+                print '[fslib]: %s' % string.replace(bom, '')
             except:
                 pass
 
