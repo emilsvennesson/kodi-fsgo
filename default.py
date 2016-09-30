@@ -95,7 +95,7 @@ def ask_bitrate(bitrates):
     for bitrate in bitrates:
         options.append(bitrate + ' Kbps')
     dialog = xbmcgui.Dialog()
-    ret = dialog.select(language(30010), options)
+    ret = dialog.select(language(30016), options)
     if ret > -1:
         return bitrates[ret]
 
