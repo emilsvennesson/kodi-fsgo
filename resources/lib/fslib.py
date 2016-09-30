@@ -82,6 +82,7 @@ class fslib(object):
             raise
 
     def get_reg_code(self):
+        """Return an activation code needed to authenticate to TV provider."""
         url = 'https://activation-adobe.foxsportsgo.com/ws/subscription/flow/foxSportGo.init'
         payload = {
             'env': 'production',
@@ -95,6 +96,7 @@ class fslib(object):
         return code_dict['code']
 
     def get_access_token(self, reg_code):
+        """Returns an access code needed to register session if TV provider login was successful."""
         url = 'https://activation-adobe.foxsportsgo.com/ws/subscription/flow/v2_foxSportsGo.validate'
         payload = {
             'reg_code': reg_code,
@@ -116,6 +118,7 @@ class fslib(object):
             return False
 
     def register_session(self, access_token):
+        """Register FS GO session. Write session_id and authentication header to file."""
         url = self.base_url + '/sessions/registered'
         session = {}
         auth = {}
@@ -123,8 +126,8 @@ class fslib(object):
         session['location'] = {}
         session['device']['token'] = access_token
         session['device']['platform'] = 'ios-tablet'
-        session['location']['latitude'] = '0'
-        session['location']['longitude'] = '0'
+        session['location']['latitude'] = '0'  # unsure if this needs to be set
+        session['location']['longitude'] = '0'  # unsure if this needs to be set
         post_data = json.JSONEncoder().encode(session)
 
         headers = {
@@ -150,6 +153,7 @@ class fslib(object):
             return True
 
     def refresh_session(self):
+        """Refreshes auth data and verifies that session is still valid."""
         url = self.base_url + '/sessions/%s/refresh' % self.session_id
         auth = {}
         headers = {
@@ -182,6 +186,7 @@ class fslib(object):
             return False
 
     def login(self, reg_code=None, session_id=None, auth_header=None):
+        """Complete login process. Errors are raised as LoginFailure."""
         if session_id and auth_header:
             if self.refresh_session():
                 self.log('Session is still valid.')
@@ -206,6 +211,7 @@ class fslib(object):
                 raise self.LoginFailure('No registration code supplied.')
 
     def get_stream_url(self, channel_id):
+        """Return the stream URL for a channel_id."""
         stream_url = {}
         url = self.base_url + '/platform/ios-tablet~3.0.3/channel/%s' % channel_id
         headers = {
@@ -239,11 +245,13 @@ class fslib(object):
         return streams
         
     def get_entitlements(self):
+        """Returns a list of channels a user has access to."""
         session_dict = self.refresh_session()
         entitlements = session_dict['user']['registration']['entitlements']
         return entitlements
 
     def get_schedule(start_date, end_date):
+        """Retrieve the FS GO schedule in a dict."""
         url = self.base_url + '/epg/ws/schedule'
         payload = {
             'start_date': start_date,
