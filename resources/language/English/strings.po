@@ -76,3 +76,15 @@ msgstr ""
 msgctxt "#30016"
 msgid "Select stream quality"
 msgstr "
+
+msgctxt "#30017"
+msgid "Time notation"
+msgstr "
+
+msgctxt "#30018"
+msgid "12-hour clock (AM/PM)"
+msgstr 
+
+msgctxt "#30019"
+msgid "24-hour clock"
+msgstr 

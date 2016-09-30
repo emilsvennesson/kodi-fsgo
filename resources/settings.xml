@@ -2,6 +2,7 @@
   <category label="30006">
     <setting id="preferred_bitrate" type="enum" label="30004" lvalues="30001|30003|30002" default="0"/>
     <setting id="max_bitrate_allowed" type="number" label="30005" default="5000" subsetting="true" visible="eq(-1,1)"/>
+    <setting id="time_notation" type="enum" label="30017" lvalues="30018|30019" default="0"/>
   </category>
   <category label="30007">
     <setting id="debug" type="bool" label="Add-on debugging" default="false"/>

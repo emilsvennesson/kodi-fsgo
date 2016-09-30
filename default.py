@@ -71,20 +71,55 @@ def main_menu():
         add_item(item, parameters)
     xbmcplugin.endOfDirectory(_handle)
     
+def coloring(text, meaning):
+    """Return the text wrapped in appropriate color markup."""
+    if meaning == 'channel':
+        color = 'FF0FE8F0'
+    elif meaning == 'time':
+        color = 'FFF16C00'
+    colored_text = '[COLOR=%s]%s[/COLOR]' % (color, text)
+    return colored_text
+    
 
 def list_events(live):
+    items = []
+    
     if live == 'true':
         schedule = fs.get_schedule(live=True)
     else:
         schedule = fs.get_schedule()
     
     for event in schedule:
-        addon_log(event)
-        title = event['title']
         channel_id = event['airings'][0]['channel_id']
+        channel_name = event['airings'][0]['channel_name']
+        event_image = event['urls'][-1]['src']
+        airing_date_obj = fs.parse_time(event['airings'][0]['airing_date'], localize=True)
+        try:
+            sport_tag = event['sport_tag']
+        except KeyError:
+            sport_tag = None
+        if addon.getSetting('time_notation') == '0':  # 12 hour clock
+            start_time = airing_date_obj.strftime('%I:%M %p')
+        else:
+            start_time = airing_date_obj.strftime('%H:%M')
         parameters = {'action': 'play_video', 'channel_id': channel_id}
+        list_title = '[B]%s[/B] %s: %s' % (coloring(start_time, 'time'), coloring(channel_name, 'channel'), event['title'])
         playable = True
-        add_item(title, parameters, playable=playable)
+        
+        art = {
+            'thumb': event_image,
+            'fanart': event_image,
+            'cover': event_image
+        }
+        
+        info = {
+            'title': event['title'],
+            'plot': event['title'],
+            'genre': sport_tag
+        }
+
+        items = add_item(list_title, parameters, items=items, playable=playable, set_art=art, set_info=info)
+    xbmcplugin.addDirectoryItems(_handle, items, len(items))
     xbmcplugin.endOfDirectory(_handle)
 
 

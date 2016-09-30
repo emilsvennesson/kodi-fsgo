@@ -7,7 +7,7 @@ If you're interested in helping out with the development, then please just send 
 ## Dependencies: ##
  * Requests >= 2.9.1 (http://mirrors.kodi.tv/addons/jarvis/script.module.requests)
  * m3u8 >= 0.2.10 (http://mirrors.kodi.tv/addons/jarvis/script.module.m3u8)
-   * which depends on iso8601 (http://mirrors.kodi.tv/addons/jarvis/script.module.iso8601)
+ * iso8601 (http://mirrors.kodi.tv/addons/jarvis/script.module.iso8601)
  
 
 This plugin supports Kodi Jarvis or later. While it may work fine on older versions as well, it is unsupported and you're encouraged to upgrade.

@@ -6,11 +6,14 @@ import json
 import codecs
 import cookielib
 import time
-from urllib import urlencode
+from datetime import datetime
+import calendar
 import uuid
+from urllib import urlencode
 
 import requests
 import m3u8
+import iso8601
 
 
 class fslib(object):
@@ -245,7 +248,7 @@ class fslib(object):
         return streams
         
     def get_entitlements(self):
-        """Returns a list of channels a user has access to."""
+        """Returns a list of channels the TV subscription has access to."""
         session_dict = self.refresh_session()
         entitlements = session_dict['user']['registration']['entitlements']
         return entitlements
@@ -267,3 +270,18 @@ class fslib(object):
         schedule = schedule_dict['body']['items']
 
         return schedule
+        
+    def utc_to_local(self, utc_dt):
+        # get integer timestamp to avoid precision lost
+        timestamp = calendar.timegm(utc_dt.timetuple())
+        local_dt = datetime.fromtimestamp(timestamp)
+        assert utc_dt.resolution >= timedelta(microseconds=1)
+        return local_dt.replace(microsecond=utc_dt.microsecond)
+
+    def parse_time(self, iso8601_string, localize=False):
+        """Parse ISO8601 string to datetime object."""
+        datetime_obj = iso8601.parse_date(iso8601_string)
+        if localize:
+            return self.utc_to_local(datetime_obj)
+        else:
+            return datetime_obj
