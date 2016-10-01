@@ -105,6 +105,8 @@ def list_events(live):
             start_time = airing_date_obj.strftime('%H:%M')
         parameters = {'action': 'play_video', 'channel_id': channel_id, 'airing_id': airing_id}
         list_title = '[B]%s[/B] %s: %s' % (coloring(start_time, 'time'), coloring(channel_name, 'channel'), event['title'])
+        if event['airings'][0]['replay']:
+            list_title = list_title + ' (R)'
         playable = True
         
         art = {
