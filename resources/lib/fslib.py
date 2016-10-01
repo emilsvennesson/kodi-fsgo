@@ -54,14 +54,11 @@ class fslib(object):
         self.log('Request URL: %s' % url)
         try:
             if method == 'get':
-                req = self.http_session.get(url, params=payload, headers=headers, allow_redirects=False,
-                                            verify=self.verify_ssl)
+                req = self.http_session.get(url, params=payload, headers=headers, allow_redirects=False, verify=self.verify_ssl)
             elif method == 'put':
-                req = self.http_session.put(url, params=payload, headers=headers, allow_redirects=False,
-                                            verify=self.verify_ssl)
+                req = self.http_session.put(url, params=payload, headers=headers, allow_redirects=False, verify=self.verify_ssl)
             else:  # post
-                req = self.http_session.post(url, data=payload, headers=headers, allow_redirects=False,
-                                             verify=self.verify_ssl)
+                req = self.http_session.post(url, data=payload, headers=headers, allow_redirects=False, verify=self.verify_ssl)
             self.log('Response code: %s' % req.status_code)
             self.log('Response: %s' % req.content)
             self.cookie_jar.save(ignore_discard=True, ignore_expires=False)
@@ -115,12 +112,11 @@ class fslib(object):
 
     def register_session(self):
         """Register FS GO session. Write session_id and authentication header to file."""
-        access_token = self.get_credentials()['access_token']
         url = self.base_url + '/sessions/registered'
         session = {}
         session['device'] = {}
         session['location'] = {}
-        session['device']['token'] = access_token
+        session['device']['token'] = self.get_credentials()['access_token']
         session['device']['platform'] = 'ios-tablet'
         session['location']['latitude'] = '0'  # unsure if this needs to be set
         session['location']['longitude'] = '0'  # unsure if this needs to be set
@@ -135,8 +131,9 @@ class fslib(object):
         session_dict = json.loads(req.content)
         if 'errors' in session_dict.keys():
             errors = []
-            for error in session_dict.values():
+            for error in session_dict['errors']:
                 errors.append(error)
+            errors = ', '.join(errors)
             self.log('Unable to register session. Error(s): %s' % errors)
             return False
         else:
@@ -164,8 +161,9 @@ class fslib(object):
         if session_dict:
             if 'errors' in session_dict.keys():
                 errors = []
-                for error in session_dict.values():
+                for error in session_dict['errors']:
                     errors.append(error)
+                errors = ', '.join(errors)
                 self.log('Unable to refresh session. Error(s): %s' % errors)
                 return False
             else:
@@ -211,7 +209,6 @@ class fslib(object):
         if credentials['session_id'] and credentials['auth_header']:
             if self.refresh_session():
                 self.log('Session is still valid.')
-                return True
             else:
                 self.log('Session has expired.')
                 if not self.register_session():
@@ -229,7 +226,6 @@ class fslib(object):
                         raise self.LoginFailure('RegFailure')
                     else:
                         self.log('Login was successful.')
-                        return True
             else:
                 self.log('No registration code supplied.')
                 raise self.LoginFailure('NoRegCode')
