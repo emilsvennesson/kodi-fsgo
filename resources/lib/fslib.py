@@ -239,9 +239,16 @@ class fslib(object):
             'Authorization': self.get_credentials()['auth_header']
         }
         stream_data = self.make_request(url=url, method='get', headers=headers)
-        stream_dict = json.loads(stream_data)['stream']
-        stream_url['manifest'] = stream_dict['location']
-        stream_url['bitrates'] = self.parse_m3u8_manifest(stream_url['manifest'])
+        stream_dict = json.loads(stream_data)
+        if 'errors' in stream_dict.keys():
+            errors = []
+            for error in stream_dict['errors']:
+                errors.append(error)
+            errors = ', '.join(errors)
+            self.log('Unable to get stream URL. Error(s): %s' % errors)
+        else:
+            stream_url['manifest'] = stream_dict['stream']['location']
+            stream_url['bitrates'] = self.parse_m3u8_manifest(stream_url['manifest'])
 
         return stream_url
 

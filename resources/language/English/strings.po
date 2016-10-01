@@ -75,16 +75,24 @@ msgstr ""
 
 msgctxt "#30016"
 msgid "Select stream quality"
-msgstr "
+msgstr ""
 
 msgctxt "#30017"
 msgid "Time notation"
-msgstr "
+msgstr ""
 
 msgctxt "#30018"
 msgid "12-hour clock (AM/PM)"
-msgstr 
+msgstr ""
 
 msgctxt "#30019"
 msgid "24-hour clock"
-msgstr 
+msgstr ""
+
+msgctxt "#30020"
+msgid "Error"
+msgstr ""
+
+msgctxt "#30021"
+msgid "Unable to find a valid stream URL. Please see the log for more information."
+msgstr ""

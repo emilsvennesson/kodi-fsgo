@@ -50,7 +50,7 @@ def addon_log(string):
 
 def play_video(channel_id, airing_id):
     stream_url = fs.get_stream_url(channel_id, airing_id)
-    if stream_url['bitrates']:
+    if stream_url:
         bitrate = select_bitrate(stream_url['bitrates'].keys())
         if bitrate:
             play_url = stream_url['bitrates'][bitrate]
@@ -59,7 +59,7 @@ def play_video(channel_id, airing_id):
             xbmcplugin.setResolvedUrl(_handle, True, listitem=playitem)
     else:
         dialog = xbmcgui.Dialog()
-        dialog.ok(language(30005), language(30013))
+        dialog.ok(language(30020), language(30021))
         
 def main_menu():
     items = [language(30014), language(30015)]
