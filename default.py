@@ -48,8 +48,8 @@ def addon_log(string):
         xbmc.log('%s: %s' % (logging_prefix, string))
 
 
-def play_video(channel_id):
-    stream_url = fs.get_stream_url(channel_id)
+def play_video(channel_id, airing_id):
+    stream_url = fs.get_stream_url(channel_id, airing_id)
     if stream_url['bitrates']:
         bitrate = select_bitrate(stream_url['bitrates'].keys())
         if bitrate:
@@ -91,6 +91,7 @@ def list_events(live):
     
     for event in schedule:
         channel_id = event['airings'][0]['channel_id']
+        airing_id = event['airings'][0]['airing_id']
         channel_name = event['airings'][0]['channel_name']
         event_image = event['urls'][-1]['src']
         airing_date_obj = fs.parse_time(event['airings'][0]['airing_date'], localize=True)
@@ -102,7 +103,7 @@ def list_events(live):
             start_time = airing_date_obj.strftime('%I:%M %p')
         else:
             start_time = airing_date_obj.strftime('%H:%M')
-        parameters = {'action': 'play_video', 'channel_id': channel_id}
+        parameters = {'action': 'play_video', 'channel_id': channel_id, 'airing_id': airing_id}
         list_title = '[B]%s[/B] %s: %s' % (coloring(start_time, 'time'), coloring(channel_name, 'channel'), event['title'])
         playable = True
         
@@ -210,7 +211,7 @@ def router(paramstring):
     params = dict(urlparse.parse_qsl(paramstring))
     if params:
         if params['action'] == 'play_video':
-            play_video(params['channel_id'])
+            play_video(params['channel_id'], params['airing_id'])
         elif params['action'] == 'list_events':
             list_events(params['live'])
     else:

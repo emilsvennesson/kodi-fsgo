@@ -230,10 +230,10 @@ class fslib(object):
                 self.log('No registration code supplied.')
                 raise self.LoginFailure('NoRegCode')
 
-    def get_stream_url(self, channel_id):
-        """Return the stream URL for a channel_id."""
+    def get_stream_url(self, channel_id, airing_id):
+        """Return the stream URL for an event."""
         stream_url = {}
-        url = self.base_url + '/platform/ios-tablet~3.0.3/channel/%s' % channel_id
+        url = self.base_url + '/platform/ios-tablet~3.0.3/channel/%s/airing/%s' % (channel_id, airing_id)
         headers = {
             'Accept': 'application/vnd.media-service+json; version=1',
             'Authorization': self.get_credentials()['auth_header']
