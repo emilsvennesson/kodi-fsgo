@@ -29,14 +29,6 @@ class fslib(object):
         except IOError:
             pass
         self.http_session.cookies = self.cookie_jar
-        try:
-            with open(self.credentials_file, 'r') as fh_credentials:
-                credentials = json.loads(fh_credentials.read())
-                self.session_id = credentials['session_id']
-                self.auth_header = credentials['auth_header']
-        except IOError:
-            self.session_id = None
-            self.auth_header = None
 
     class LoginFailure(Exception):
         def __init__(self, value):
@@ -99,7 +91,7 @@ class fslib(object):
         return code_dict['code']
 
     def get_access_token(self, reg_code):
-        """Returns an access code needed to register session if TV provider login was successful."""
+        """Saves an access code needed to register session if TV provider login was successful."""
         url = 'https://activation-adobe.foxsportsgo.com/ws/subscription/flow/v2_foxSportsGo.validate'
         payload = {
             'reg_code': reg_code,
@@ -114,17 +106,18 @@ class fslib(object):
         reg_dict = json.loads(reg_data)
 
         if reg_dict['status'] == 'Success':
+            self.save_credentials(access_token=reg_dict['access_token'])
             self.log('Successfully authenticated to TV provider (%s)' % reg_dict['auth_provider_name'])
-            return reg_dict['access_token']
+            return True
         else:
             self.log('Unable to authenticate to TV provider. Status: %s' % reg_dict['status'])
             return False
 
-    def register_session(self, access_token):
+    def register_session(self):
         """Register FS GO session. Write session_id and authentication header to file."""
+        access_token = self.get_credentials()['access_token']
         url = self.base_url + '/sessions/registered'
         session = {}
-        auth = {}
         session['device'] = {}
         session['location'] = {}
         session['device']['token'] = access_token
@@ -147,22 +140,19 @@ class fslib(object):
             self.log('Unable to register session. Error(s): %s' % errors)
             return False
         else:
+            session_id = session_dict['id']
             auth_header = req.headers['Authorization']
-            auth['session_id'] = session_dict['id']
-            auth['auth_header'] = auth_header
-            with open(self.credentials_file, 'w') as fh_credentials:
-                fh_credentials.write(json.JSONEncoder().encode(auth))
+            self.save_credentials(session_id, auth_header)
             self.log('Successfully registered session.')
             return True
 
     def refresh_session(self):
-        """Refreshes auth data and verifies that session is still valid."""
-        url = self.base_url + '/sessions/%s/refresh' % self.session_id
-        auth = {}
+        """Refreshes auth data and verifies that the session is still valid."""
+        url = self.base_url + '/sessions/%s/refresh' % self.get_credentials()['session_id']
         headers = {
             'Accept': 'application/vnd.session-service+json; version=1',
             'Content-Type': 'application/vnd.session-service+json; version=1',
-            'Authorization': self.auth_header
+            'Authorization': self.get_credentials()['auth_header']
         }
         req = self.make_request(url=url, method='put', headers=headers, return_req=True)
         session_data = req.content
@@ -179,39 +169,70 @@ class fslib(object):
                 self.log('Unable to refresh session. Error(s): %s' % errors)
                 return False
             else:
+                session_id = session_dict['id']
                 auth_header = req.headers['Authorization']
-                auth['session_id'] = session_dict['id']
-                auth['auth_header'] = auth_header
-                with open(self.credentials_file, 'w') as fh_credentials:
-                    fh_credentials.write(json.JSONEncoder().encode(auth))
+                self.save_credentials(session_id, auth_header)
                 return session_dict
         else:
             return False
+            
+    def save_credentials(self, session_id=None, auth_header=None, access_token=None):
+        credentials = {}
+        if not session_id:
+            session_id = self.get_credentials()['session_id']
+        if not auth_header:
+            auth_header = self.get_credentials()['auth_header']
+        if not access_token:
+            access_token = self.get_credentials()['access_token']
+            
+        credentials['session_id'] = session_id
+        credentials['auth_header'] = auth_header
+        credentials['access_token'] = access_token
+        
+        with open(self.credentials_file, 'w') as fh_credentials:
+            fh_credentials.write(json.JSONEncoder().encode(credentials))
+            
+    def get_credentials(self):
+        try:
+            with open(self.credentials_file, 'r') as fh_credentials:
+                return json.loads(fh_credentials.read())
+        except IOError:
+            credentials = {}
+            credentials['session_id'] = None
+            credentials['auth_header'] = None
+            credentials['access_token'] = None
+            with open(self.credentials_file, 'w') as fh_credentials:
+                fh_credentials.write(json.JSONEncoder().encode(credentials))
+                return credentials
 
-    def login(self, reg_code=None, session_id=None, auth_header=None):
+    def login(self, reg_code=None):
         """Complete login process. Errors are raised as LoginFailure."""
-        if session_id and auth_header:
+        credentials = self.get_credentials()
+        if credentials['session_id'] and credentials['auth_header']:
             if self.refresh_session():
                 self.log('Session is still valid.')
                 return True
             else:
-                self.log('No valid session found. Authorization needed.')
-                raise self.LoginFailure('No valid session found. Authorization needed.')
+                self.log('Session has expired.')
+                if not self.register_session():
+                    self.log('Unable to re-register to FS GO. Re-authentication is needed.')
+                    raise self.LoginFailure('AuthRequired')
+                else:
+                    self.log('Successfully re-registered to FS GO.')
         else:
             if reg_code:
                 self.log('Not (yet) logged in.')
-                access_token = self.get_access_token(reg_code)
-                if not access_token:
-                    raise self.LoginFailure('Authorization failure.')
+                if not self.get_access_token(reg_code):
+                    raise self.LoginFailure('AuthFailure')
                 else:
-                    if not self.register_session(access_token):
-                        raise self.LoginFailure('Unable to register session.')
+                    if not self.register_session():
+                        raise self.LoginFailure('RegFailure')
                     else:
                         self.log('Login was successful.')
                         return True
             else:
                 self.log('No registration code supplied.')
-                raise self.LoginFailure('No registration code supplied.')
+                raise self.LoginFailure('NoRegCode')
 
     def get_stream_url(self, channel_id):
         """Return the stream URL for a channel_id."""
@@ -219,7 +240,7 @@ class fslib(object):
         url = self.base_url + '/platform/ios-tablet~3.0.3/channel/%s' % channel_id
         headers = {
             'Accept': 'application/vnd.media-service+json; version=1',
-            'Authorization': self.auth_header
+            'Authorization': self.get_credentials()['auth_header']
         }
         stream_data = self.make_request(url=url, method='get', headers=headers)
         stream_dict = json.loads(stream_data)['stream']
@@ -235,7 +256,7 @@ class fslib(object):
         m3u8_manifest = req.content
         self.log('HLS manifest: \n %s' % m3u8_manifest)
 
-        m3u8_header = {'Cookie': 'Authorization=' + self.auth_header}
+        m3u8_header = {'Cookie': 'Authorization=' + self.get_credentials()['auth_header']}
         m3u8_obj = m3u8.loads(m3u8_manifest)
         for playlist in m3u8_obj.playlists:
             bitrate = int(playlist.stream_info.bandwidth) / 1000
@@ -264,7 +285,7 @@ class fslib(object):
                 'start_date': start_date,
                 'end_date': end_date
             }  
-        headers = {'Authorization': self.auth_header}
+        headers = {'Authorization': self.get_credentials()['auth_header']}
         schedule_data = self.make_request(url=url, method='get', payload=payload, headers=headers)
         schedule_dict = json.loads(schedule_data)
         schedule = schedule_dict['body']['items']

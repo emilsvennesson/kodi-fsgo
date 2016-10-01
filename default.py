@@ -188,18 +188,18 @@ def add_item(title, parameters, items=False, folder=True, playable=False, set_in
         return items
 
 
-def init(reg_code=None, session_id=None, auth_header=None):
+def init(reg_code=None):
     try:
-        fs.login(session_id=session_id, auth_header=auth_header, reg_code=reg_code)
+        fs.login(reg_code)
         main_menu()
     except fs.LoginFailure as error:
-        if error.value == 'No registration code supplied.' or error.value == 'No valid session found. Authorization needed.':
+        if error.value == 'NoRegCode' or error.value == 'AuthRequired':
             reg_code = fs.get_reg_code()
             dialog = xbmcgui.Dialog()
             info_message = '%s[B]%s[/B] [CR][CR]%s' % (language(30010), reg_code, language(30011))
             dialog.ok(language(30009), info_message)
             init(reg_code)
-        elif error.value == 'Authorization failure.':
+        elif error.value == 'AuthFailure':
             dialog = xbmcgui.Dialog()
             dialog.ok(language(30012), language(30013))
             sys.exit(0)
@@ -214,7 +214,7 @@ def router(paramstring):
         elif params['action'] == 'list_events':
             list_events(params['live'])
     else:
-        init(session_id=fs.session_id, auth_header=fs.auth_header)
+        init()
 
 
 if __name__ == '__main__':
