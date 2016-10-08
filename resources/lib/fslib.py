@@ -190,6 +190,15 @@ class fslib(object):
         with open(self.credentials_file, 'w') as fh_credentials:
             fh_credentials.write(json.JSONEncoder().encode(credentials))
             
+    def reset_credentials(self):
+        credentials = {}
+        credentials['session_id'] = None
+        credentials['auth_header'] = None
+        credentials['access_token'] = None
+        
+        with open(self.credentials_file, 'w') as fh_credentials:
+            fh_credentials.write(json.JSONEncoder().encode(credentials))
+             
     def get_credentials(self):
         try:
             with open(self.credentials_file, 'r') as fh_credentials:
@@ -213,6 +222,7 @@ class fslib(object):
                 self.log('Session has expired.')
                 if not self.register_session():
                     self.log('Unable to re-register to FS GO. Re-authentication is needed.')
+                    self.reset_credentials()
                     raise self.LoginFailure('AuthRequired')
                 else:
                     self.log('Successfully re-registered to FS GO.')
