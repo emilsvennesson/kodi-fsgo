@@ -84,10 +84,15 @@ def coloring(text, meaning):
 def list_events(live):
     items = []
     
-    if live == 'true':
-        schedule = fs.get_schedule(live=True)
+    if addon.getSetting('show_deportes') == 'true':
+        deportes = True
     else:
-        schedule = fs.get_schedule()
+        deportes = False
+    
+    if live == 'true':
+        schedule = fs.get_schedule(deportes=deportes, live=True)
+    else:
+        schedule = fs.get_schedule(deportes=deportes)
     
     for event in schedule:
         channel_id = event['airings'][0]['channel_id']

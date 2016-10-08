@@ -96,3 +96,7 @@ msgstr ""
 msgctxt "#30021"
 msgid "Unable to find a valid stream URL. Please see the log for more information."
 msgstr ""
+
+msgctxt "#30022"
+msgid "Show FOX Deportes programs"
+msgstr ""
