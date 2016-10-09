@@ -295,7 +295,7 @@ class fslib(object):
             deportes = 'false'
         if live:
             url = self.base_url + '/epg/ws/live/all'
-            payload = {}
+            payload = None
         else:
             url = self.base_url + '/epg/ws/schedule'
             payload = {
