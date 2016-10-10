@@ -65,7 +65,7 @@ def main_menu():
     items = [language(30014), language(30015)]
     for item in items:
         if item == language(30014):
-            parameters = {'action': 'list_events', 'live': 'true'}
+            parameters = {'action': 'list_events', 'schedule_type': 'live'}
         else:
            parameters = {'action': 'list_schedule'} 
         add_item(item, parameters)
@@ -81,7 +81,7 @@ def coloring(text, meaning):
     return colored_text
     
 
-def list_events(live):
+def list_events(schedule_type):
     items = []
     
     if addon.getSetting('show_deportes') == 'true':
@@ -89,10 +89,7 @@ def list_events(live):
     else:
         deportes = False
     
-    if live == 'true':
-        schedule = fs.get_schedule(deportes=deportes, live=True)
-    else:
-        schedule = fs.get_schedule(deportes=deportes)
+    schedule = fs.get_schedule(schedule_type, deportes=deportes)
     
     for event in schedule:
         channel_id = event['airings'][0]['channel_id']
@@ -220,7 +217,7 @@ def router(paramstring):
         if params['action'] == 'play_video':
             play_video(params['channel_id'], params['airing_id'])
         elif params['action'] == 'list_events':
-            list_events(params['live'])
+            list_events(params['schedule_type'])
     else:
         init()
 

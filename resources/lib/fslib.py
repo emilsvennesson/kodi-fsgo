@@ -287,21 +287,24 @@ class fslib(object):
         entitlements = session_dict['user']['registration']['entitlements']
         return entitlements
 
-    def get_schedule(self, start_date=None, end_date=None, deportes=True, live=False):
+    def get_schedule(self, schedule_type, start_date=None, end_date=None, deportes=True):
         """Retrieve the FS GO schedule in a dict."""
-        if deportes:
-            deportes = 'true'
-        else:
-            deportes = 'false'
-        if live:
+        if schedule_type == 'live':
             url = self.base_url + '/epg/ws/live/all'
+            payload = None
+        elif schedule_type == 'featured':
+            url = self.base_url + '/epg/ws/featured/all/offset/0/size/50'
             payload = None
         else:
             url = self.base_url + '/epg/ws/schedule'
             payload = {
                 'start_date': start_date,
                 'end_date': end_date
-            }  
+            }
+        if deportes:
+            deportes = 'true'
+        else:
+            deportes = 'false'
         headers = {
             'Authorization': self.get_credentials()['auth_header'],
             'deportes': deportes
