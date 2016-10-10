@@ -204,13 +204,9 @@ class fslib(object):
             with open(self.credentials_file, 'r') as fh_credentials:
                 return json.loads(fh_credentials.read())
         except IOError:
-            credentials = {}
-            credentials['session_id'] = None
-            credentials['auth_header'] = None
-            credentials['access_token'] = None
-            with open(self.credentials_file, 'w') as fh_credentials:
-                fh_credentials.write(json.JSONEncoder().encode(credentials))
-                return credentials
+            self.reset_credentials()
+            with open(self.credentials_file, 'r') as fh_credentials:
+                return json.loads(fh_credentials.read())
 
     def login(self, reg_code=None):
         """Complete login process. Errors are raised as LoginFailure."""
