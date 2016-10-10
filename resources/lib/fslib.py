@@ -298,8 +298,9 @@ class fslib(object):
         else:
             url = self.base_url + '/epg/ws/schedule'
             payload = {
-                'start_date': start_date,
-                'end_date': end_date
+                # this needs to be in ISO 8601 format
+                'start_date': str(start_date),
+                'end_date': str(end_date)
             }
         if deportes:
             deportes = 'true'
@@ -315,6 +316,21 @@ class fslib(object):
 
         return schedule
         
+    def get_event_dates(self):
+        """Return a list of dates in datetime.date format containing at least one event."""
+        dates = []
+        now = datetime.now()
+        start_date = now.isoformat()
+        schedule = self.get_schedule('all', start_date=start_date)
+        
+        for event in schedule:
+            datetime_obj = self.parse_datetime(event['airings'][0]['airing_date'], localize=True)
+            event_date = datetime_obj.date()
+            if event_date not in dates:
+                dates.append(event_date)
+                
+        return dates
+        
     def utc_to_local(self, utc_dt):
         # get integer timestamp to avoid precision lost
         timestamp = calendar.timegm(utc_dt.timetuple())
@@ -322,7 +338,7 @@ class fslib(object):
         assert utc_dt.resolution >= timedelta(microseconds=1)
         return local_dt.replace(microsecond=utc_dt.microsecond)
 
-    def parse_time(self, iso8601_string, localize=False):
+    def parse_datetime(self, iso8601_string, localize=False):
         """Parse ISO8601 string to datetime object."""
         datetime_obj = iso8601.parse_date(iso8601_string)
         if localize:

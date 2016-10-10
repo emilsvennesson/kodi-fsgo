@@ -96,7 +96,7 @@ def list_events(schedule_type):
         airing_id = event['airings'][0]['airing_id']
         channel_name = event['airings'][0]['channel_name']
         event_image = event['urls'][-1]['src']
-        airing_date_obj = fs.parse_time(event['airings'][0]['airing_date'], localize=True)
+        airing_date_obj = fs.parse_datetime(event['airings'][0]['airing_date'], localize=True)
         try:
             sport_tag = event['sport_tag']
         except KeyError:
