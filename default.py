@@ -6,6 +6,7 @@ import sys
 import os
 import urllib
 import urlparse
+from datetime import datetime
 
 from resources.lib.fslib import fslib
 
@@ -65,9 +66,12 @@ def main_menu():
     items = [language(30014), language(30015)]
     for item in items:
         if item == language(30014):
-            parameters = {'action': 'list_events', 'schedule_type': 'live'}
+            parameters = {
+                'action': 'list_events',
+                'schedule_type': 'live'
+            }
         else:
-           parameters = {'action': 'list_schedule'} 
+           parameters = {'action': 'list_event_dates'} 
         add_item(item, parameters)
     xbmcplugin.endOfDirectory(_handle)
     
@@ -97,15 +101,23 @@ def list_events(schedule_type):
         channel_name = event['airings'][0]['channel_name']
         event_image = event['urls'][-1]['src']
         airing_date_obj = fs.parse_datetime(event['airings'][0]['airing_date'], localize=True)
+        
         try:
             sport_tag = event['sport_tag']
         except KeyError:
             sport_tag = None
+            
         if addon.getSetting('time_notation') == '0':  # 12 hour clock
             start_time = airing_date_obj.strftime('%I:%M %p')
         else:
             start_time = airing_date_obj.strftime('%H:%M')
-        parameters = {'action': 'play_video', 'channel_id': channel_id, 'airing_id': airing_id}
+            
+        parameters = {
+            'action': 'play_video',
+            'channel_id': channel_id,
+            'airing_id': airing_id
+        }
+        
         list_title = '[B]%s[/B] %s: %s' % (coloring(start_time, 'time'), coloring(channel_name, 'channel'), event['title'])
         if event['airings'][0]['replay']:
             list_title = list_title + ' (R)'
@@ -125,6 +137,26 @@ def list_events(schedule_type):
 
         items = add_item(list_title, parameters, items=items, playable=playable, set_art=art, set_info=info)
     xbmcplugin.addDirectoryItems(_handle, items, len(items))
+    xbmcplugin.endOfDirectory(_handle)
+
+    
+def list_event_dates():
+    event_dates = fs.get_event_dates()
+    now = datetime.now()
+    date_today = now.date()
+    
+    for date in event_dates:
+        if date == date_today:
+            title = language(30023)
+        else:
+            title = date.strftime('%Y-%m-%d')
+        parameters = {
+            'action': 'list_events',
+            'schedule_type': 'all',
+            'date': date
+        }
+        
+        add_item(title, parameters)
     xbmcplugin.endOfDirectory(_handle)
 
 
@@ -218,6 +250,8 @@ def router(paramstring):
             play_video(params['channel_id'], params['airing_id'])
         elif params['action'] == 'list_events':
             list_events(params['schedule_type'])
+        elif params['action'] == 'list_event_dates':
+            list_event_dates()
     else:
         init()
 

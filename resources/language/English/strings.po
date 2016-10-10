@@ -100,3 +100,7 @@ msgstr ""
 msgctxt "#30022"
 msgid "Show FOX Deportes programs"
 msgstr ""
+
+msgctxt "#30023"
+msgid "Today"
+msgstr ""
