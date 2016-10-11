@@ -158,8 +158,8 @@ def list_events(schedule_type, filter_date=False):
     
 def list_event_dates():
     event_dates = fs.get_event_dates()
-    now_local = fs.utc_to_local(datetime.now())
-    date_today = now_local.date()
+    now = datetime.now()
+    date_today = now.date()
     
     for date in event_dates:
         if date == date_today:

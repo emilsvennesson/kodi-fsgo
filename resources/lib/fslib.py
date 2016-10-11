@@ -333,8 +333,8 @@ class fslib(object):
     def get_event_dates(self):
         """Return a list of dates in datetime.date format containing at least one event."""
         dates = []
-        now = datetime.now()
-        start_date = now.isoformat()
+        utc_now = datetime.utcnow()
+        start_date = utc_now.isoformat()
         schedule = self.get_schedule('all', start_date=start_date)
         
         for event in schedule:
