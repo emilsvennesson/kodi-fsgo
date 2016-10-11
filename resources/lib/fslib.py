@@ -6,7 +6,7 @@ import json
 import codecs
 import cookielib
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 import calendar
 import uuid
 from urllib import urlencode
@@ -283,7 +283,7 @@ class fslib(object):
         entitlements = session_dict['user']['registration']['entitlements']
         return entitlements
 
-    def get_schedule(self, schedule_type, start_date=None, end_date=None, deportes=True):
+    def get_schedule(self, schedule_type, start_date=None, end_date=None, filter_date=False, deportes=True):
         """Retrieve the FS GO schedule in a dict."""
         if schedule_type == 'live':
             url = self.base_url + '/epg/ws/live/all'
@@ -293,6 +293,14 @@ class fslib(object):
             payload = None
         else:
             url = self.base_url + '/epg/ws/schedule'
+            if filter_date:
+                # filter_date needs to be a date string in '%Y-%m-%d' format
+                filter_date_obj = datetime(*(time.strptime(filter_date, '%Y-%m-%d')[0:6]))  # http://forum.kodi.tv/showthread.php?tid=112916
+                # subtract and add one day to start and end_date to ensure the response returns the right events regardless of timezone
+                start_date_obj = filter_date_obj - timedelta(days=1)
+                end_date_obj = filter_date_obj + timedelta(days=1)
+                start_date = start_date_obj.isoformat()
+                end_date = end_date_obj.isoformat()
             payload = {
                 # this needs to be in ISO 8601 format
                 'start_date': str(start_date),
@@ -309,8 +317,18 @@ class fslib(object):
         schedule_data = self.make_request(url=url, method='get', payload=payload, headers=headers)
         schedule_dict = json.loads(schedule_data)
         schedule = schedule_dict['body']['items']
-
-        return schedule
+        
+        if filter_date:
+            schedule_filtered = []
+            date_to_filter = filter_date_obj.date()
+            for event in schedule:
+                event_datetime_obj = self.parse_datetime(event['airings'][0]['airing_date'], localize=True)
+                event_date = event_datetime_obj.date()
+                if date_to_filter == event_date:
+                    schedule_filtered.append(event)
+            return schedule_filtered
+        else:
+            return schedule
         
     def get_event_dates(self):
         """Return a list of dates in datetime.date format containing at least one event."""

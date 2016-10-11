@@ -104,3 +104,11 @@ msgstr ""
 msgctxt "#30023"
 msgid "Today"
 msgstr ""
+
+msgctxt "#30024"
+msgid "This event starts at"
+msgstr ""
+
+msgctxt "#30025"
+msgid "Information"
+msgstr ""

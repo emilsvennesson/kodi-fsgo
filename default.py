@@ -85,7 +85,7 @@ def coloring(text, meaning):
     return colored_text
     
 
-def list_events(schedule_type):
+def list_events(schedule_type, filter_date=False):
     items = []
     
     if addon.getSetting('show_deportes') == 'true':
@@ -93,7 +93,7 @@ def list_events(schedule_type):
     else:
         deportes = False
     
-    schedule = fs.get_schedule(schedule_type, deportes=deportes)
+    schedule = fs.get_schedule(schedule_type, filter_date=filter_date, deportes=deportes)
     
     for event in schedule:
         channel_id = event['airings'][0]['channel_id']
@@ -108,20 +108,36 @@ def list_events(schedule_type):
             sport_tag = None
             
         if addon.getSetting('time_notation') == '0':  # 12 hour clock
-            start_time = airing_date_obj.strftime('%I:%M %p')
+            if schedule_type == 'live':
+                start_time = airing_date_obj.strftime('%I:%M %p')
+            else:
+                start_time = airing_date_obj.strftime('%Y-%m-%d %I:%M %p')
         else:
-            start_time = airing_date_obj.strftime('%H:%M')
-            
-        parameters = {
-            'action': 'play_video',
-            'channel_id': channel_id,
-            'airing_id': airing_id
-        }
-        
+            if schedule_type == 'live':
+               start_time = airing_date_obj.strftime('%H:%M')
+            else:
+               start_time = airing_date_obj.strftime('%Y-%m-%d %H:%M') 
+                   
         list_title = '[B]%s[/B] %s: %s' % (coloring(start_time, 'time'), coloring(channel_name, 'channel'), event['title'])
+
         if event['airings'][0]['replay']:
             list_title = list_title + ' (R)'
-        playable = True
+        if event['airings'][0]['is_live']:
+            parameters = {
+                'action': 'play_video',
+                'channel_id': channel_id,
+                'airing_id': airing_id
+            }
+            playable = True
+        else:
+            message = '%s [B]%s[/B].' % (language(30024), start_time)
+            parameters = {
+                'action': 'show_dialog',
+                'dialog_type': 'ok',
+                'heading': language(30025),
+                'message': message
+            }
+            playable = False
         
         art = {
             'thumb': event_image,
@@ -142,8 +158,8 @@ def list_events(schedule_type):
     
 def list_event_dates():
     event_dates = fs.get_event_dates()
-    now = datetime.now()
-    date_today = now.date()
+    now_local = fs.utc_to_local(datetime.now())
+    date_today = now_local.date()
     
     for date in event_dates:
         if date == date_today:
@@ -151,9 +167,9 @@ def list_event_dates():
         else:
             title = date.strftime('%Y-%m-%d')
         parameters = {
-            'action': 'list_events',
+            'action': 'list_events_by_date',
             'schedule_type': 'all',
-            'date': date
+            'filter_date': date
         }
         
         add_item(title, parameters)
@@ -195,6 +211,12 @@ def select_bitrate(manifest_bitrates=None):
             return allowed_bitrates[0]
     else:
         return ask_bitrate(manifest_bitrates)
+
+        
+def show_dialog(dialog_type, heading, message):
+    dialog = xbmcgui.Dialog()
+    if dialog_type == 'ok':
+        dialog.ok(heading, message)
 
 
 def add_item(title, parameters, items=False, folder=True, playable=False, set_info=False, set_art=False,
@@ -250,8 +272,12 @@ def router(paramstring):
             play_video(params['channel_id'], params['airing_id'])
         elif params['action'] == 'list_events':
             list_events(params['schedule_type'])
+        elif params['action'] == 'list_events_by_date':
+            list_events(params['schedule_type'], params['filter_date'])
         elif params['action'] == 'list_event_dates':
             list_event_dates()
+        elif params['action'] == 'show_dialog':
+            show_dialog(params['dialog_type'], params['heading'], params['message'])
     else:
         init()
 
