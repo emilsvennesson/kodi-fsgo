@@ -295,10 +295,12 @@ class fslib(object):
             url = self.base_url + '/epg/ws/schedule'
             if filter_date:
                 # filter_date needs to be a date string in '%Y-%m-%d' format
-                filter_date_obj = datetime(*(time.strptime(filter_date, '%Y-%m-%d')[0:6]))  # http://forum.kodi.tv/showthread.php?tid=112916
-                # subtract and add one day to start and end_date to ensure the response returns the right events regardless of timezone
-                start_date_obj = filter_date_obj - timedelta(days=1)
-                end_date_obj = filter_date_obj + timedelta(days=1)
+                # http://forum.kodi.tv/showthread.php?tid=112916
+                filter_date_obj = datetime(*(time.strptime(filter_date, '%Y-%m-%d')[0:6]))
+                # subtract and add two days to start and end_date to ensure the
+                # response returns the right events regardless of timezone
+                start_date_obj = filter_date_obj - timedelta(days=2)
+                end_date_obj = filter_date_obj + timedelta(days=2)
                 start_date = start_date_obj.isoformat()
                 end_date = end_date_obj.isoformat()
             payload = {
