@@ -98,9 +98,9 @@ def coloring(text, meaning):
     
 
 def list_events(schedule_type, filter_date=False):
+    items = []
     now = datetime.now()
     date_today = now.date()
-    items = []
     
     if addon.getSetting('show_deportes') == 'true':
         deportes = True
@@ -113,10 +113,9 @@ def list_events(schedule_type, filter_date=False):
         channel_id = event['airings'][0]['channel_id']
         airing_id = event['airings'][0]['airing_id']
         channel_name = event['airings'][0]['channel_name']
-        event_image = event['urls'][-1]['src']
         airing_date_obj = fs.parse_datetime(event['airings'][0]['airing_date'], localize=True)
         airing_date = airing_date_obj.date()
-        
+                          
         try:
             sport_tag = event['sport_tag']
         except KeyError:
@@ -150,19 +149,28 @@ def list_events(schedule_type, filter_date=False):
             }
             playable = False
             date_color = 'upcoming'
-        
-        art = {
-            'thumb': event_image,
-            'fanart': event_image,
-            'cover': event_image
-        }
-        
+               
         info = {
             'title': event['title'],
             'plot': event['title'],
             'genre': sport_tag
         }
         
+        try:
+            event_images = event['urls']
+            highest_res = 0
+            for image in event_images:
+                image_res = int(image['size'].split('_')[2])
+                if image_res > highest_res:
+                    art = {
+                    'thumb': image['src'],
+                    'fanart': image['src'],
+                    'cover': image['src']
+                    }
+                    highest_res = image_res
+        except KeyError:
+            art = None
+                   
         list_title = '[B]%s[/B] %s: %s' % (coloring(start_time, date_color), coloring(channel_name, 'channel'), event['title'])
         if event['airings'][0]['replay']:
             list_title = '%s [B]%s[/B]' % (list_title, coloring('(R)', 'replay'))
