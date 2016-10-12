@@ -63,12 +63,15 @@ def play_video(channel_id, airing_id):
         dialog.ok(language(30020), language(30021))
         
 def main_menu():
-    items = [language(30014), language(30015)]
+    items = [language(30023), language(30015)]
     for item in items:
-        if item == language(30014):
+        if item == language(30023):
+            now_utc = datetime.utcnow()
+            utc_date = now_utc.date()
             parameters = {
-                'action': 'list_events',
-                'schedule_type': 'live'
+                'action': 'list_events_by_date',
+                'schedule_type': 'all',
+                'filter_date': utc_date
             }
         else:
            parameters = {'action': 'list_event_dates'} 
@@ -162,17 +165,16 @@ def list_event_dates():
     date_today = now.date()
     
     for date in event_dates:
-        if date == date_today:
-            title = language(30023)
-        else:
+        # don't list today as it's already in main menu
+        if not date == date_today:
             title = date.strftime('%Y-%m-%d')
-        parameters = {
-            'action': 'list_events_by_date',
-            'schedule_type': 'all',
-            'filter_date': date
-        }
+            parameters = {
+                'action': 'list_events_by_date',
+                'schedule_type': 'all',
+                'filter_date': date
+            }
         
-        add_item(title, parameters)
+            add_item(title, parameters)
     xbmcplugin.endOfDirectory(_handle)
 
 
