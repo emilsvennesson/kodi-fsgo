@@ -63,7 +63,7 @@ def play_video(channel_id, airing_id):
         dialog.ok(language(30020), language(30021))
         
 def main_menu():
-    items = [language(30023), language(30015)]
+    items = [language(30023), language(30015), language(30026)]
     for item in items:
         if item == language(30023):
             now_utc = datetime.utcnow()
@@ -73,8 +73,13 @@ def main_menu():
                 'schedule_type': 'all',
                 'filter_date': utc_date
             }
+        elif item == language(30015):
+           parameters = {'action': 'list_event_dates'}
         else:
-           parameters = {'action': 'list_event_dates'} 
+            parameters = {
+                'action': 'list_events',
+                'schedule_type': 'featured'
+            }
         add_item(item, parameters)
     xbmcplugin.endOfDirectory(_handle)
     
