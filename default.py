@@ -86,6 +86,8 @@ def coloring(text, meaning):
         color = 'FF03F12F'
     elif meaning == 'upcoming':
         color = 'FFF16C00'
+    elif meaning == 'replay':
+        color = 'FFE71A2B'
     colored_text = '[COLOR=%s]%s[/COLOR]' % (color, text)
     return colored_text
     
@@ -158,7 +160,7 @@ def list_events(schedule_type, filter_date=False):
         
         list_title = '[B]%s[/B] %s: %s' % (coloring(start_time, date_color), coloring(channel_name, 'channel'), event['title'])
         if event['airings'][0]['replay']:
-            list_title = list_title + ' (R)'
+            list_title = '%s [B]%s[/B]' % (list_title, coloring('(R)', 'replay'))
 
         items = add_item(list_title, parameters, items=items, playable=playable, set_art=art, set_info=info)
     xbmcplugin.addDirectoryItems(_handle, items, len(items))
