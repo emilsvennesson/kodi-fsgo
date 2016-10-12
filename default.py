@@ -82,13 +82,17 @@ def coloring(text, meaning):
     """Return the text wrapped in appropriate color markup."""
     if meaning == 'channel':
         color = 'FF0FE8F0'
-    elif meaning == 'time':
+    elif meaning == 'live':
+        color = 'FF03F12F'
+    elif meaning == 'upcoming':
         color = 'FFF16C00'
     colored_text = '[COLOR=%s]%s[/COLOR]' % (color, text)
     return colored_text
     
 
 def list_events(schedule_type, filter_date=False):
+    now = datetime.now()
+    date_today = now.date()
     items = []
     
     if addon.getSetting('show_deportes') == 'true':
@@ -104,6 +108,7 @@ def list_events(schedule_type, filter_date=False):
         channel_name = event['airings'][0]['channel_name']
         event_image = event['urls'][-1]['src']
         airing_date_obj = fs.parse_datetime(event['airings'][0]['airing_date'], localize=True)
+        airing_date = airing_date_obj.date()
         
         try:
             sport_tag = event['sport_tag']
@@ -111,20 +116,15 @@ def list_events(schedule_type, filter_date=False):
             sport_tag = None
             
         if addon.getSetting('time_notation') == '0':  # 12 hour clock
-            if schedule_type == 'live':
-                start_time = airing_date_obj.strftime('%I:%M %p')
-            else:
-                start_time = airing_date_obj.strftime('%Y-%m-%d %I:%M %p')
+            time = airing_date_obj.strftime('%I:%M %p')
         else:
-            if schedule_type == 'live':
-               start_time = airing_date_obj.strftime('%H:%M')
-            else:
-               start_time = airing_date_obj.strftime('%Y-%m-%d %H:%M') 
+            time = airing_date_obj.strftime('%H:%M')
+            
+        if airing_date == date_today:
+            start_time = '%s %s' % (language(30023), time)
+        else:
+            start_time = '%s %s' % (airing_date_obj.strftime('%Y-%m-%d'), time)
                    
-        list_title = '[B]%s[/B] %s: %s' % (coloring(start_time, 'time'), coloring(channel_name, 'channel'), event['title'])
-
-        if event['airings'][0]['replay']:
-            list_title = list_title + ' (R)'
         if event['airings'][0]['is_live']:
             parameters = {
                 'action': 'play_video',
@@ -132,6 +132,7 @@ def list_events(schedule_type, filter_date=False):
                 'airing_id': airing_id
             }
             playable = True
+            date_color = 'live'
         else:
             message = '%s [B]%s[/B].' % (language(30024), start_time)
             parameters = {
@@ -141,6 +142,7 @@ def list_events(schedule_type, filter_date=False):
                 'message': message
             }
             playable = False
+            date_color = 'upcoming'
         
         art = {
             'thumb': event_image,
@@ -153,6 +155,10 @@ def list_events(schedule_type, filter_date=False):
             'plot': event['title'],
             'genre': sport_tag
         }
+        
+        list_title = '[B]%s[/B] %s: %s' % (coloring(start_time, date_color), coloring(channel_name, 'channel'), event['title'])
+        if event['airings'][0]['replay']:
+            list_title = list_title + ' (R)'
 
         items = add_item(list_title, parameters, items=items, playable=playable, set_art=art, set_info=info)
     xbmcplugin.addDirectoryItems(_handle, items, len(items))

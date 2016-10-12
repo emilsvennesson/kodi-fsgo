@@ -106,7 +106,7 @@ msgid "Today"
 msgstr ""
 
 msgctxt "#30024"
-msgid "This event starts at"
+msgid "This event starts"
 msgstr ""
 
 msgctxt "#30025"
