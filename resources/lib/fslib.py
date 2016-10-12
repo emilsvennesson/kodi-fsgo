@@ -236,10 +236,13 @@ class fslib(object):
                 self.log('No registration code supplied.')
                 raise self.LoginFailure('NoRegCode')
 
-    def get_stream_url(self, channel_id, airing_id):
+    def get_stream_url(self, channel_id, airing_id=None):
         """Return the stream URL for an event."""
         stream_url = {}
-        url = self.base_url + '/platform/ios-tablet~3.0.3/channel/%s/airing/%s' % (channel_id, airing_id)
+        if airing_id:
+            url = self.base_url + '/platform/ios-tablet~3.0.3/channel/%s/airing/%s' % (channel_id, airing_id)
+        else:
+            url = self.base_url + '/platform/ios-tablet~3.0.3/channel/%s' % channel_id
         headers = {
             'Accept': 'application/vnd.media-service+json; version=1',
             'Authorization': self.get_credentials()['auth_header']
@@ -331,6 +334,17 @@ class fslib(object):
             return schedule_filtered
         else:
             return schedule
+            
+    def get_channels(self):
+        """Return the available FS GO channels."""
+        url = self.base_url + '/epg/ws/channel/all'
+        headers = {'Authorization': self.get_credentials()['auth_header']}
+        
+        channel_data = self.make_request(url=url, method='get', headers=headers)
+        channel_dict = json.loads(channel_data)
+        channels = channel_dict['body']['items']
+        
+        return channels
         
     def get_event_dates(self):
         """Return a list of dates in datetime.date format containing at least one event."""
