@@ -279,12 +279,6 @@ class fslib(object):
             streams[str(bitrate)] = stream_url + '|' + urlencode(m3u8_header)
 
         return streams
-        
-    def get_entitlements(self):
-        """Returns a list of channels the TV subscription has access to."""
-        session_dict = self.refresh_session()
-        entitlements = session_dict['user']['registration']['entitlements']
-        return entitlements
 
     def get_schedule(self, schedule_type, start_date=None, end_date=None, filter_date=False, deportes=True):
         """Retrieve the FS GO schedule in a dict."""
