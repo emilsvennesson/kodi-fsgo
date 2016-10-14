@@ -319,8 +319,15 @@ class fslib(object):
             for event in schedule:
                 event_datetime_obj = self.parse_datetime(event['airings'][0]['airing_date'], localize=True)
                 event_date = event_datetime_obj.date()
+                now = datetime.now()
+                date_today = now.date()
                 if date_to_filter == event_date:
                     schedule_filtered.append(event)
+                if date_to_filter == date_today:
+                    # include current live events on 24h cutover
+                    if event['airings'][0]['is_live']:
+                        if event not in schedule_filtered:
+                            schedule_filtered.append(event)
             return schedule_filtered
         else:
             return schedule
