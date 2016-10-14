@@ -66,12 +66,12 @@ def main_menu():
     items = [language(30023), language(30015), language(30026), language(30030)]
     for item in items:
         if item == language(30023):
-            now_utc = datetime.utcnow()
-            utc_date = now_utc.date()
+            now = datetime.now()
+            date_today = now.date()
             parameters = {
                 'action': 'list_events_by_date',
                 'schedule_type': 'all',
-                'filter_date': utc_date
+                'filter_date': date_today
             }
         elif item == language(30015):
            parameters = {'action': 'list_event_dates'}
@@ -212,8 +212,8 @@ def list_event_dates():
     date_today = now.date()
     
     for date in event_dates:
-        # don't list today as it's already in main menu
-        if not date == date_today:
+        # only list upcoming days
+        if date > date_today:
             title = date.strftime('%Y-%m-%d')
             parameters = {
                 'action': 'list_events_by_date',
