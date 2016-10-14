@@ -297,15 +297,9 @@ class fslib(object):
         else:
             url = self.base_url + '/epg/ws/schedule'
             if filter_date:
-                # filter_date needs to be a date string in '%Y-%m-%d' format
-                # http://forum.kodi.tv/showthread.php?tid=112916
-                filter_date_obj = datetime(*(time.strptime(filter_date, '%Y-%m-%d')[0:6]))
-                # subtract and add two days to start and end_date to ensure the
-                # response returns the right events regardless of timezone
-                start_date_obj = filter_date_obj - timedelta(days=2)
-                end_date_obj = filter_date_obj + timedelta(days=2)
-                start_date = start_date_obj.isoformat()
-                end_date = end_date_obj.isoformat()
+                # send current UTC time as start_date to grab all events
+                utcnow = datetime.utcnow()
+                start_date = utcnow.isoformat()
             payload = {
                 # this needs to be in ISO 8601 format
                 'start_date': str(start_date),
@@ -325,6 +319,7 @@ class fslib(object):
         
         if filter_date:
             schedule_filtered = []
+            filter_date_obj = datetime(*(time.strptime(filter_date, '%Y-%m-%d')[0:6]))
             date_to_filter = filter_date_obj.date()
             for event in schedule:
                 event_datetime_obj = self.parse_datetime(event['airings'][0]['airing_date'], localize=True)
