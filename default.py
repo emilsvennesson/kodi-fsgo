@@ -279,12 +279,18 @@ def init(reg_code=None):
             reg_code = fs.get_reg_code()
             dialog = xbmcgui.Dialog()
             info_message = '%s[B]%s[/B] [CR][CR]%s' % (language(30010), reg_code, language(30011))
-            dialog.ok(language(30009), info_message)
-            init(reg_code)
+            ok = dialog.yesno(language(30009), info_message, nolabel=language(30028), yeslabel=language(30027))
+            if ok:
+                init(reg_code)
+            else:
+                sys.exit(0)
         elif error.value == 'AuthFailure':
             dialog = xbmcgui.Dialog()
-            dialog.ok(language(30012), language(30013))
-            sys.exit(0)
+            try_again = dialog.yesno(language(30012), language(30013), nolabel=language(30028), yeslabel=language(30029))
+            if try_again:
+                init()
+            else:
+                sys.exit(0)
 
 
 def router(paramstring):
