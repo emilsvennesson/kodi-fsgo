@@ -63,7 +63,7 @@ def play_video(channel_id, airing_id):
         dialog.ok(language(30020), language(30021))
         
 def main_menu():
-    items = [language(30023), language(30015), language(30026)]
+    items = [language(30023), language(30015), language(30026), language(30030)]
     for item in items:
         if item == language(30023):
             now_utc = datetime.utcnow()
@@ -75,11 +75,14 @@ def main_menu():
             }
         elif item == language(30015):
            parameters = {'action': 'list_event_dates'}
-        else:
+        elif item == language(30026):
             parameters = {
                 'action': 'list_events',
                 'schedule_type': 'featured'
             }
+        else:  # auth details
+            item = '[B]%s[/B]' % item
+            parameters = {'action': 'show_auth_details'}
         add_item(item, parameters)
     xbmcplugin.endOfDirectory(_handle)
     
@@ -178,6 +181,29 @@ def list_events(schedule_type, filter_date=False):
         items = add_item(list_title, parameters, items=items, playable=playable, set_art=art, set_info=info)
     xbmcplugin.addDirectoryItems(_handle, items, len(items))
     xbmcplugin.endOfDirectory(_handle)
+    
+def show_auth_details():
+    auth_details = fs.refresh_session()['user']['registration']
+    
+    tv_provider = auth_details['auth_provider']
+    entitlements = ', '.join(auth_details['entitlements'])
+    expiration_date_obj = fs.parse_datetime(auth_details['expires_on'], localize=True)
+    if addon.getSetting('time_notation') == '0':  # 12 hour clock
+        expiration_date = expiration_date_obj.strftime('%Y-%m-%d %I:%M %p')
+    else:
+        expiration_date = expiration_date_obj.strftime('%Y-%m-%d %H:%M')
+        
+    tv_provider_msg = '[B]%s:[/B] %s' % (language(30031), tv_provider) 
+    entitlements_msg = '[B]%s:[/B] %s' % (language(30032), entitlements) 
+    expiration_date_msg = '%s [B]%s[/B].' % (language(30033), expiration_date)
+    message = '%s[CR]%s[CR][CR]%s' % (tv_provider_msg, entitlements_msg, expiration_date_msg)
+    log_out = show_dialog('yesno', language(30030), message, nolabel=language(30027), yeslabel=language(30034))
+
+    if log_out:
+        confirm_log_out = show_dialog('yesno', language(30034), language(30035))
+        if confirm_log_out:
+            fs.reset_credentials()
+            sys.exit(0)
 
     
 def list_event_dates():
@@ -209,6 +235,8 @@ def ask_bitrate(bitrates):
     ret = dialog.select(language(30016), options)
     if ret > -1:
         return bitrates[ret]
+    else:
+        return None
 
 
 def select_bitrate(manifest_bitrates=None):
@@ -236,11 +264,13 @@ def select_bitrate(manifest_bitrates=None):
         return ask_bitrate(manifest_bitrates)
 
         
-def show_dialog(dialog_type, heading, message):
+def show_dialog(dialog_type, heading, message, nolabel=None, yeslabel=None):
     dialog = xbmcgui.Dialog()
     if dialog_type == 'ok':
         dialog.ok(heading, message)
-
+    elif dialog_type == 'yesno':
+        return dialog.yesno(heading, message, nolabel=nolabel, yeslabel=yeslabel)
+        
 
 def add_item(title, parameters, items=False, folder=True, playable=False, set_info=False, set_art=False,
              watched=False, set_content=False):
@@ -277,16 +307,14 @@ def init(reg_code=None):
     except fs.LoginFailure as error:
         if error.value == 'NoRegCode' or error.value == 'AuthRequired':
             reg_code = fs.get_reg_code()
-            dialog = xbmcgui.Dialog()
             info_message = '%s[B]%s[/B] [CR][CR]%s' % (language(30010), reg_code, language(30011))
-            ok = dialog.yesno(language(30009), info_message, nolabel=language(30028), yeslabel=language(30027))
+            ok = show_dialog('yesno', language(30009), info_message, nolabel=language(30028), yeslabel=language(30027))
             if ok:
                 init(reg_code)
             else:
                 sys.exit(0)
         elif error.value == 'AuthFailure':
-            dialog = xbmcgui.Dialog()
-            try_again = dialog.yesno(language(30012), language(30013), nolabel=language(30028), yeslabel=language(30029))
+            try_again = show_dialog('yesno', language(30012), language(30013), nolabel=language(30028), yeslabel=language(30029))
             if try_again:
                 init()
             else:
@@ -305,6 +333,8 @@ def router(paramstring):
             list_events(params['schedule_type'], params['filter_date'])
         elif params['action'] == 'list_event_dates':
             list_event_dates()
+        elif params['action'] == 'show_auth_details':
+            show_auth_details()
         elif params['action'] == 'show_dialog':
             show_dialog(params['dialog_type'], params['heading'], params['message'])
     else:

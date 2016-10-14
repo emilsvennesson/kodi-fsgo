@@ -128,3 +128,27 @@ msgstr ""
 msgctxt "#30029"
 msgid "Try again"
 msgstr ""
+
+msgctxt "#30030"
+msgid "Authentication details"
+msgstr ""
+
+msgctxt "#30031"
+msgid "TV provider"
+msgstr ""
+
+msgctxt "#30032"
+msgid "Entitlements"
+msgstr ""
+
+msgctxt "#30033"
+msgid "This session will expire on"
+msgstr ""
+
+msgctxt "#30034"
+msgid "Log out"
+msgstr ""
+
+msgctxt "#30035"
+msgid "Are you sure you want to log out? This will reload the add-on and force you to re-authenticate."
+msgstr ""
