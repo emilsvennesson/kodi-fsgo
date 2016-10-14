@@ -319,6 +319,7 @@ class fslib(object):
         
         if filter_date:
             schedule_filtered = []
+            # http://forum.kodi.tv/showthread.php?tid=112916
             filter_date_obj = datetime(*(time.strptime(filter_date, '%Y-%m-%d')[0:6]))
             date_to_filter = filter_date_obj.date()
             for event in schedule:
