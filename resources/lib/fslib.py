@@ -173,7 +173,7 @@ class fslib(object):
                 return session_dict
         else:
             return False
-            
+
     def save_credentials(self, session_id=None, auth_header=None, access_token=None):
         credentials = {}
         if not session_id:
@@ -182,23 +182,23 @@ class fslib(object):
             auth_header = self.get_credentials()['auth_header']
         if not access_token:
             access_token = self.get_credentials()['access_token']
-            
+
         credentials['session_id'] = session_id
         credentials['auth_header'] = auth_header
         credentials['access_token'] = access_token
-        
+
         with open(self.credentials_file, 'w') as fh_credentials:
             fh_credentials.write(json.JSONEncoder().encode(credentials))
-            
+
     def reset_credentials(self):
         credentials = {}
         credentials['session_id'] = None
         credentials['auth_header'] = None
         credentials['access_token'] = None
-        
+
         with open(self.credentials_file, 'w') as fh_credentials:
             fh_credentials.write(json.JSONEncoder().encode(credentials))
-             
+
     def get_credentials(self):
         try:
             with open(self.credentials_file, 'r') as fh_credentials:
@@ -310,7 +310,7 @@ class fslib(object):
         schedule_data = self.make_request(url=url, method='get', payload=payload, headers=headers)
         schedule_dict = json.loads(schedule_data)
         schedule = schedule_dict['body']['items']
-        
+
         if filter_date:
             schedule_filtered = []
             # http://forum.kodi.tv/showthread.php?tid=112916
@@ -331,33 +331,33 @@ class fslib(object):
             return schedule_filtered
         else:
             return schedule
-            
+
     def get_channels(self):
         """Return the available FS GO channels."""
         url = self.base_url + '/epg/ws/channel/all'
         headers = {'Authorization': self.get_credentials()['auth_header']}
-        
+
         channel_data = self.make_request(url=url, method='get', headers=headers)
         channel_dict = json.loads(channel_data)
         channels = channel_dict['body']['items']
-        
+
         return channels
-        
+
     def get_event_dates(self):
         """Return a list of dates in datetime.date format containing at least one event."""
         dates = []
         utc_now = datetime.utcnow()
         start_date = utc_now.isoformat()
         schedule = self.get_schedule('all', start_date=start_date)
-        
+
         for event in schedule:
             datetime_obj = self.parse_datetime(event['airings'][0]['airing_date'], localize=True)
             event_date = datetime_obj.date()
             if event_date not in dates:
                 dates.append(event_date)
-                
+
         return dates
-        
+
     def utc_to_local(self, utc_dt):
         # get integer timestamp to avoid precision lost
         timestamp = calendar.timegm(utc_dt.timetuple())

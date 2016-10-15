@@ -61,7 +61,8 @@ def play_video(channel_id, airing_id):
     else:
         dialog = xbmcgui.Dialog()
         dialog.ok(language(30020), language(30021))
-        
+
+
 def main_menu():
     items = [language(30023), language(30015), language(30026), language(30030)]
     for item in items:
@@ -74,7 +75,7 @@ def main_menu():
                 'filter_date': date_today
             }
         elif item == language(30015):
-           parameters = {'action': 'list_event_dates'}
+            parameters = {'action': 'list_event_dates'}
         elif item == language(30026):
             parameters = {
                 'action': 'list_events',
@@ -85,7 +86,8 @@ def main_menu():
             parameters = {'action': 'show_auth_details'}
         add_item(item, parameters)
     xbmcplugin.endOfDirectory(_handle)
-    
+
+
 def coloring(text, meaning):
     """Return the text wrapped in appropriate color markup."""
     if meaning == 'channel':
@@ -98,42 +100,42 @@ def coloring(text, meaning):
         color = 'FFE71A2B'
     colored_text = '[COLOR=%s]%s[/COLOR]' % (color, text)
     return colored_text
-    
+
 
 def list_events(schedule_type, filter_date=False):
     items = []
     now = datetime.now()
     date_today = now.date()
-    
+
     if addon.getSetting('show_deportes') == 'true':
         deportes = True
     else:
         deportes = False
-    
+
     schedule = fs.get_schedule(schedule_type, filter_date=filter_date, deportes=deportes)
-    
+
     for event in schedule:
         channel_id = event['airings'][0]['channel_id']
         airing_id = event['airings'][0]['airing_id']
         channel_name = event['airings'][0]['channel_name']
         airing_date_obj = fs.parse_datetime(event['airings'][0]['airing_date'], localize=True)
         airing_date = airing_date_obj.date()
-                          
+
         try:
             sport_tag = event['sport_tag']
         except KeyError:
             sport_tag = None
-            
+
         if addon.getSetting('time_notation') == '0':  # 12 hour clock
             time = airing_date_obj.strftime('%I:%M %p')
         else:
             time = airing_date_obj.strftime('%H:%M')
-            
+
         if airing_date == date_today:
             start_time = '%s %s' % (language(30023), time)
         else:
             start_time = '%s %s' % (airing_date_obj.strftime('%Y-%m-%d'), time)
-                   
+
         if event['airings'][0]['is_live']:
             parameters = {
                 'action': 'play_video',
@@ -152,13 +154,13 @@ def list_events(schedule_type, filter_date=False):
             }
             playable = False
             date_color = 'upcoming'
-               
+
         info = {
             'title': event['title'],
             'plot': event['title'],
             'genre': sport_tag
         }
-        
+
         try:
             event_images = event['urls']
             highest_res = 0
@@ -166,14 +168,14 @@ def list_events(schedule_type, filter_date=False):
                 image_res = int(image['size'].split('_')[2])
                 if image_res > highest_res:
                     art = {
-                    'thumb': image['src'],
-                    'fanart': image['src'],
-                    'cover': image['src']
+                        'thumb': image['src'],
+                        'fanart': image['src'],
+                        'cover': image['src']
                     }
                     highest_res = image_res
         except KeyError:
             art = None
-                   
+
         list_title = '[B]%s[/B] %s: %s' % (coloring(start_time, date_color), coloring(channel_name, 'channel'), event['title'])
         if event['airings'][0]['replay']:
             list_title = '%s [B]%s[/B]' % (list_title, coloring('(R)', 'replay'))
@@ -181,10 +183,11 @@ def list_events(schedule_type, filter_date=False):
         items = add_item(list_title, parameters, items=items, playable=playable, set_art=art, set_info=info)
     xbmcplugin.addDirectoryItems(_handle, items, len(items))
     xbmcplugin.endOfDirectory(_handle)
-    
+
+
 def show_auth_details():
     auth_details = fs.refresh_session()['user']['registration']
-    
+
     tv_provider = auth_details['auth_provider']
     entitlements = ', '.join(auth_details['entitlements'])
     expiration_date_obj = fs.parse_datetime(auth_details['expires_on'], localize=True)
@@ -192,9 +195,9 @@ def show_auth_details():
         expiration_date = expiration_date_obj.strftime('%Y-%m-%d %I:%M %p')
     else:
         expiration_date = expiration_date_obj.strftime('%Y-%m-%d %H:%M')
-        
-    tv_provider_msg = '[B]%s:[/B] %s' % (language(30031), tv_provider) 
-    entitlements_msg = '[B]%s:[/B] %s' % (language(30032), entitlements) 
+
+    tv_provider_msg = '[B]%s:[/B] %s' % (language(30031), tv_provider)
+    entitlements_msg = '[B]%s:[/B] %s' % (language(30032), entitlements)
     expiration_date_msg = '%s [B]%s[/B].' % (language(30033), expiration_date)
     message = '%s[CR]%s[CR][CR]%s' % (tv_provider_msg, entitlements_msg, expiration_date_msg)
     log_out = show_dialog('yesno', language(30030), message, nolabel=language(30027), yeslabel=language(30034))
@@ -205,12 +208,12 @@ def show_auth_details():
             fs.reset_credentials()
             sys.exit(0)
 
-    
+
 def list_event_dates():
     event_dates = fs.get_event_dates()
     now = datetime.now()
     date_today = now.date()
-    
+
     for date in event_dates:
         # only list upcoming days
         if date > date_today:
@@ -220,7 +223,7 @@ def list_event_dates():
                 'schedule_type': 'all',
                 'filter_date': date
             }
-        
+
             add_item(title, parameters)
     xbmcplugin.endOfDirectory(_handle)
 
@@ -263,14 +266,14 @@ def select_bitrate(manifest_bitrates=None):
     else:
         return ask_bitrate(manifest_bitrates)
 
-        
+
 def show_dialog(dialog_type, heading, message, nolabel=None, yeslabel=None):
     dialog = xbmcgui.Dialog()
     if dialog_type == 'ok':
         dialog.ok(heading, message)
     elif dialog_type == 'yesno':
         return dialog.yesno(heading, message, nolabel=nolabel, yeslabel=yeslabel)
-        
+
 
 def add_item(title, parameters, items=False, folder=True, playable=False, set_info=False, set_art=False,
              watched=False, set_content=False):
