@@ -107,12 +107,7 @@ def list_events(schedule_type, filter_date=False, search_query=None):
     now = datetime.now()
     date_today = now.date()
 
-    if addon.getSetting('show_deportes') == 'true':
-        deportes = True
-    else:
-        deportes = False
-
-    schedule = fsgo.get_schedule(schedule_type, filter_date=filter_date, deportes=deportes, search_query=search_query)
+    schedule = fsgo.get_schedule(schedule_type, filter_date=filter_date, deportes=addon.getSetting('show_deportes'), search_query=search_query)
 
     for event in schedule:
         channel_id = event['airings'][0]['channel_id']

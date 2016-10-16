@@ -280,7 +280,7 @@ class fsgolib(object):
 
         return streams
 
-    def get_schedule(self, schedule_type, start_date=None, end_date=None, filter_date=False, deportes=True, search_query=None):
+    def get_schedule(self, schedule_type, start_date=None, end_date=None, filter_date=False, deportes='true', search_query=None):
         """Retrieve the FS GO schedule in a dict."""
         if schedule_type == 'live':
             url = self.base_url + '/epg/ws/live/all'
@@ -305,13 +305,9 @@ class fsgolib(object):
                 'start_date': str(start_date),
                 'end_date': str(end_date)
             }
-        if deportes:
-            deportes = 'true'
-        else:
-            deportes = 'false'
         headers = {
             'Authorization': self.get_credentials()['auth_header'],
-            'deportes': deportes
+            'deportes': deportes  # 'true' or 'false'
         }
 
         schedule_data = self.make_request(url=url, method='get', payload=payload, headers=headers)
