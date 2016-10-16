@@ -16,7 +16,7 @@ import m3u8
 import iso8601
 
 
-class fslib(object):
+class fsgolib(object):
     def __init__(self, cookie_file, credentials_file, debug=False, verify_ssl=True):
         self.debug = debug
         self.verify_ssl = verify_ssl
@@ -40,12 +40,12 @@ class fslib(object):
     def log(self, string):
         if self.debug:
             try:
-                print '[fslib]: %s' % string
+                print '[fsgolib]: %s' % string
             except UnicodeEncodeError:
                 # we can't anticipate everything in unicode they might throw at
                 # us, but we can handle a simple BOM
                 bom = unicode(codecs.BOM_UTF8, 'utf8')
-                print '[fslib]: %s' % string.replace(bom, '')
+                print '[fsgolib]: %s' % string.replace(bom, '')
             except:
                 pass
 

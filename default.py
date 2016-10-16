@@ -8,7 +8,7 @@ import urllib
 import urlparse
 from datetime import datetime
 
-from resources.lib.fslib import fslib
+from resources.lib.fsgo import fsgolib
 
 import xbmc
 import xbmcaddon
@@ -41,7 +41,7 @@ if addon.getSetting('verify_ssl') == 'false':
 else:
     verify_ssl = True
 
-fs = fslib(cookie_file, credentials_file, debug, verify_ssl)
+fsgo = fsgolib(cookie_file, credentials_file, debug, verify_ssl)
 
 
 def addon_log(string):
@@ -50,7 +50,7 @@ def addon_log(string):
 
 
 def play_video(channel_id, airing_id):
-    stream_url = fs.get_stream_url(channel_id, airing_id)
+    stream_url = fsgo.get_stream_url(channel_id, airing_id)
     if stream_url:
         bitrate = select_bitrate(stream_url['bitrates'].keys())
         if bitrate:
@@ -112,13 +112,13 @@ def list_events(schedule_type, filter_date=False, search_query=None):
     else:
         deportes = False
 
-    schedule = fs.get_schedule(schedule_type, filter_date=filter_date, deportes=deportes, search_query=search_query)
+    schedule = fsgo.get_schedule(schedule_type, filter_date=filter_date, deportes=deportes, search_query=search_query)
 
     for event in schedule:
         channel_id = event['airings'][0]['channel_id']
         airing_id = event['airings'][0]['airing_id']
         channel_name = event['airings'][0]['channel_name']
-        airing_date_obj = fs.parse_datetime(event['airings'][0]['airing_date'], localize=True)
+        airing_date_obj = fsgo.parse_datetime(event['airings'][0]['airing_date'], localize=True)
         airing_date = airing_date_obj.date()
 
         try:
@@ -186,11 +186,11 @@ def list_events(schedule_type, filter_date=False, search_query=None):
 
 
 def show_auth_details():
-    auth_details = fs.refresh_session()['user']['registration']
+    auth_details = fsgo.refresh_session()['user']['registration']
 
     tv_provider = auth_details['auth_provider']
     entitlements = ', '.join(auth_details['entitlements'])
-    expiration_date_obj = fs.parse_datetime(auth_details['expires_on'], localize=True)
+    expiration_date_obj = fsgo.parse_datetime(auth_details['expires_on'], localize=True)
     if addon.getSetting('time_notation') == '0':  # 12 hour clock
         expiration_date = expiration_date_obj.strftime('%Y-%m-%d %I:%M %p')
     else:
@@ -205,12 +205,12 @@ def show_auth_details():
     if log_out:
         confirm_log_out = show_dialog('yesno', language(30034), message=language(30035))
         if confirm_log_out:
-            fs.reset_credentials()
+            fsgo.reset_credentials()
             sys.exit(0)
 
 
 def list_upcoming_days():
-    event_dates = fs.get_event_dates()
+    event_dates = fsgo.get_event_dates()
     now = datetime.now()
     date_today = now.date()
 
@@ -278,7 +278,7 @@ def show_dialog(dialog_type, heading, message=None, options=None, nolabel=None, 
         else:
             return None
 
-        
+
 def get_user_input(heading):
     keyboard = xbmc.Keyboard('', heading)
     keyboard.doModal()
@@ -287,13 +287,13 @@ def get_user_input(heading):
         addon_log('User input string: %s' % query)
     else:
         query = None
-        
+
     if query and len(query) > 0:
         return query
     else:
         return None
 
-        
+
 def search():
     search_query = get_user_input(language(30037))
     if search_query:
@@ -330,11 +330,11 @@ def add_item(title, parameters, items=False, folder=True, playable=False, set_in
 
 def init(reg_code=None):
     try:
-        fs.login(reg_code)
+        fsgo.login(reg_code)
         main_menu()
-    except fs.LoginFailure as error:
+    except fsgo.LoginFailure as error:
         if error.value == 'NoRegCode' or error.value == 'AuthRequired':
-            reg_code = fs.get_reg_code()
+            reg_code = fsgo.get_reg_code()
             info_message = '%s[B]%s[/B] [CR][CR]%s' % (language(30010), reg_code, language(30011))
             ok = show_dialog('yesno', language(30009), message=info_message, nolabel=language(30028), yeslabel=language(30027))
             if ok:
