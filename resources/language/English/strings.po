@@ -62,7 +62,7 @@ msgid "Authentication failed"
 msgstr ""
 
 msgctxt "#30013"
-msgid "Unable to login to your TV provider.[CR][CR]Please make sure that you successfully activated your code before you clicked OK."
+msgid "Unable to login to your TV provider.[CR][CR]Please make sure that you successfully activate your code before clicking OK."
 msgstr ""
 
 msgctxt "#30014"
