@@ -73,7 +73,7 @@ def main_menu():
                 'filter_date': 'today'
             }
         elif item == language(30015):
-            parameters = {'action': 'list_event_dates'}
+            parameters = {'action': 'list_upcoming_days'}
         elif item == language(30026):
             parameters = {
                 'action': 'list_events',
@@ -210,13 +210,12 @@ def show_auth_details():
             sys.exit(0)
 
 
-def list_event_dates():
+def list_upcoming_days():
     event_dates = fs.get_event_dates()
     now = datetime.now()
     date_today = now.date()
 
     for date in event_dates:
-        # only list upcoming days
         if date > date_today:
             title = date.strftime('%Y-%m-%d')
             parameters = {
@@ -356,8 +355,8 @@ def router(paramstring):
             list_events(params['schedule_type'])
         elif params['action'] == 'list_events_by_date':
             list_events(params['schedule_type'], params['filter_date'])
-        elif params['action'] == 'list_event_dates':
-            list_event_dates()
+        elif params['action'] == 'list_upcoming_days':
+            list_upcoming_days()
         elif params['action'] == 'show_auth_details':
             show_auth_details()
         elif params['action'] == 'search':
