@@ -67,12 +67,10 @@ def main_menu():
     items = [language(30023), language(30015), language(30026), language(30030)]
     for item in items:
         if item == language(30023):
-            now = datetime.now()
-            date_today = now.date()
             parameters = {
                 'action': 'list_events_by_date',
                 'schedule_type': 'all',
-                'filter_date': date_today
+                'filter_date': 'today'
             }
         elif item == language(30015):
             parameters = {'action': 'list_event_dates'}

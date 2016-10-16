@@ -295,7 +295,7 @@ class fslib(object):
                 utcnow = datetime.utcnow()
                 start_date = utcnow.isoformat()
             payload = {
-                # this needs to be in ISO 8601 format
+                # this should be a UTC date string in iso8601 format
                 'start_date': str(start_date),
                 'end_date': str(end_date)
             }
@@ -311,19 +311,21 @@ class fslib(object):
         schedule_dict = json.loads(schedule_data)
         schedule = schedule_dict['body']['items']
 
-        if filter_date:
+        if filter_date:  # filter_date should be 'today' or date string in %Y-%m-%d format
             schedule_filtered = []
-            # http://forum.kodi.tv/showthread.php?tid=112916
-            filter_date_obj = datetime(*(time.strptime(filter_date, '%Y-%m-%d')[0:6]))
-            date_to_filter = filter_date_obj.date()
+            if filter_date == 'today':
+                now = datetime.now()
+                date_today = now.date()
+                date_to_filter = date_today
+            else:
+                filter_date_obj = datetime(*(time.strptime(filter_date, '%Y-%m-%d')[0:6]))  # http://forum.kodi.tv/showthread.php?tid=112916
+                date_to_filter = filter_date_obj.date()
             for event in schedule:
                 event_datetime_obj = self.parse_datetime(event['airings'][0]['airing_date'], localize=True)
                 event_date = event_datetime_obj.date()
-                now = datetime.now()
-                date_today = now.date()
                 if date_to_filter == event_date:
                     schedule_filtered.append(event)
-                if date_to_filter == date_today:
+                if filter_date == 'today':
                     # include current live events on 24h cutover
                     if event['airings'][0]['is_live']:
                         if event not in schedule_filtered:
