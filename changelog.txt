@@ -1,0 +1,6 @@
+2016.09.16 v1.1.0
++ Initial stable release.
++ Thanks to MetalChris for helping out with the icon!
+
+v1.0.0
++ Unreleased developement version

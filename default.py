@@ -1,6 +1,6 @@
 ﻿# -*- coding: utf-8 -*-
 """
-A Kodi plugin for ESPN Player
+A Kodi plugin for FOX Sports GO
 """
 import sys
 import os
