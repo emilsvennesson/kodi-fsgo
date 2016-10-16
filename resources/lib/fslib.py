@@ -280,7 +280,7 @@ class fslib(object):
 
         return streams
 
-    def get_schedule(self, schedule_type, start_date=None, end_date=None, filter_date=False, deportes=True):
+    def get_schedule(self, schedule_type, start_date=None, end_date=None, filter_date=False, deportes=True, search_query=None):
         """Retrieve the FS GO schedule in a dict."""
         if schedule_type == 'live':
             url = self.base_url + '/epg/ws/live/all'
@@ -288,6 +288,12 @@ class fslib(object):
         elif schedule_type == 'featured':
             url = self.base_url + '/epg/ws/featured/all/offset/0/size/50'
             payload = None
+        elif schedule_type == 'search':
+            url = self.base_url + '/epg/ws/search/offset/0/size/20'
+            payload = {
+                'search_type': 'programs',
+                'search': search_query
+            }
         else:
             url = self.base_url + '/epg/ws/schedule'
             if filter_date:
@@ -307,6 +313,7 @@ class fslib(object):
             'Authorization': self.get_credentials()['auth_header'],
             'deportes': deportes
         }
+
         schedule_data = self.make_request(url=url, method='get', payload=payload, headers=headers)
         schedule_dict = json.loads(schedule_data)
         schedule = schedule_dict['body']['items']

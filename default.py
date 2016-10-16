@@ -64,7 +64,7 @@ def play_video(channel_id, airing_id):
 
 
 def main_menu():
-    items = [language(30023), language(30015), language(30026), language(30030)]
+    items = [language(30023), language(30015), language(30026), language(30036), language(30030)]
     for item in items:
         if item == language(30023):
             parameters = {
@@ -79,9 +79,12 @@ def main_menu():
                 'action': 'list_events',
                 'schedule_type': 'featured'
             }
+        elif item == language(30036):
+            parameters = {'action': 'search'}
         else:  # auth details
             item = '[B]%s[/B]' % item
             parameters = {'action': 'show_auth_details'}
+
         add_item(item, parameters)
     xbmcplugin.endOfDirectory(_handle)
 
@@ -100,7 +103,7 @@ def coloring(text, meaning):
     return colored_text
 
 
-def list_events(schedule_type, filter_date=False):
+def list_events(schedule_type, filter_date=False, search_query=None):
     items = []
     now = datetime.now()
     date_today = now.date()
@@ -110,7 +113,7 @@ def list_events(schedule_type, filter_date=False):
     else:
         deportes = False
 
-    schedule = fs.get_schedule(schedule_type, filter_date=filter_date, deportes=deportes)
+    schedule = fs.get_schedule(schedule_type, filter_date=filter_date, deportes=deportes, search_query=search_query)
 
     for event in schedule:
         channel_id = event['airings'][0]['channel_id']
@@ -272,6 +275,27 @@ def show_dialog(dialog_type, heading, message, nolabel=None, yeslabel=None):
     elif dialog_type == 'yesno':
         return dialog.yesno(heading, message, nolabel=nolabel, yeslabel=yeslabel)
 
+        
+def get_user_input(heading):
+    keyboard = xbmc.Keyboard('', heading)
+    keyboard.doModal()
+    if keyboard.isConfirmed():
+        query = keyboard.getText()
+        addon_log('User input string: %s' % query)
+    else:
+        query = None
+        
+    if query and len(query) > 0:
+        return query
+    else:
+        return None
+
+        
+def search():
+    search_query = get_user_input(language(30037))
+    if search_query:
+        list_events('search', search_query=search_query)
+
 
 def add_item(title, parameters, items=False, folder=True, playable=False, set_info=False, set_art=False,
              watched=False, set_content=False):
@@ -336,6 +360,8 @@ def router(paramstring):
             list_event_dates()
         elif params['action'] == 'show_auth_details':
             show_auth_details()
+        elif params['action'] == 'search':
+            search()
         elif params['action'] == 'show_dialog':
             show_dialog(params['dialog_type'], params['heading'], params['message'])
     else:
