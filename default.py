@@ -261,6 +261,9 @@ def select_bitrate(manifest_bitrates=None):
                 allowed_bitrates.append(str(bitrate))
         if allowed_bitrates:
             return allowed_bitrates[0]
+        else:
+            addon_log('No bitrate in stream matched the maximum bitrate allowed.')
+            return None
     else:
         return ask_bitrate(manifest_bitrates)
 
@@ -298,6 +301,8 @@ def search():
     search_query = get_user_input(language(30037))
     if search_query:
         list_events('search', search_query=search_query)
+    else:
+        addon_log('No search query provided.')
 
 
 def add_item(title, parameters, items=False, folder=True, playable=False, set_info=False, set_art=False,
@@ -332,6 +337,7 @@ def init(reg_code=None):
     try:
         fsgo.login(reg_code)
         main_menu()
+        addon_log('Init successful!')
     except fsgo.LoginFailure as error:
         if error.value == 'NoRegCode' or error.value == 'AuthRequired':
             reg_code = fsgo.get_reg_code()
