@@ -12,10 +12,12 @@
     <provides>video</provides>
   </extension>
   <extension point="xbmc.addon.metadata">
-    <description lang="en">Watch content from FOX Sports GO.</description>
+    <description lang="en">Watch live sports and shows from FOX Sports GO.[CR][CR]Please note that this add-on requires you to have a subscription to one of FOX Sports GO's participating TV providers. </description>
     <platform>all</platform>
     <license>GNU GENERAL PUBLIC LICENSE. Version 3, 29 June 2007</license>
     <source>https://github.com/emilsvennesson/kodi-fsgo</source>
-    <disclaimer>This addon requires you to have a subscription to one of FOX Sports GO's participating TV providers.[CR]This addon is completely unofficial and is not endorsed by Fox in any way.</disclaimer>
+    <forum>http://forum.kodi.tv/showthread.php?tid=293178</forum>
+    <language>en</language>
+    <disclaimer>This addon is completely unofficial and is not endorsed by FOX in any way.</disclaimer>
   </extension>
 </addon>
