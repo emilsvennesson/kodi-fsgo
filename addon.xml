@@ -7,12 +7,13 @@
     <import addon="xbmc.python" version="2.24.0"/>
     <import addon="script.module.requests" version="2.9.1"/>
     <import addon="script.module.m3u8" version="0.2.10"/>
+    <import addon="script.module.iso8601" version="0.1.11"/>
   </requires>
   <extension point="xbmc.python.pluginsource" library="default.py">
     <provides>video</provides>
   </extension>
   <extension point="xbmc.addon.metadata">
-    <description lang="en">Watch live sports and shows from FOX Sports GO.[CR][CR]Please note that this add-on requires you to have a subscription to one of FOX Sports GO's participating TV providers. </description>
+    <description lang="en">Watch live sports and shows from FOX Sports GO.[CR][CR]Please note that this add-on requires you to have a subscription to one of FOX Sports GO's participating TV providers.</description>
     <news>2016.10.16 v1.1.0
     + Initial stable release.
     + Thanks to MetalChris for helping out with the icon!</news>
