@@ -120,7 +120,7 @@ class fsgolib(object):
         session['device']['platform'] = 'ios-tablet'
         session['location']['latitude'] = '0'  # unsure if this needs to be set
         session['location']['longitude'] = '0'  # unsure if this needs to be set
-        post_data = json.JSONEncoder().encode(session)
+        post_data = json.dumps(session)
 
         headers = {
             'Accept': 'application/vnd.session-service+json; version=1',
@@ -188,7 +188,7 @@ class fsgolib(object):
         credentials['access_token'] = access_token
 
         with open(self.credentials_file, 'w') as fh_credentials:
-            fh_credentials.write(json.JSONEncoder().encode(credentials))
+            fh_credentials.write(json.dumps(credentials))
 
     def reset_credentials(self):
         credentials = {}
@@ -197,7 +197,7 @@ class fsgolib(object):
         credentials['access_token'] = None
 
         with open(self.credentials_file, 'w') as fh_credentials:
-            fh_credentials.write(json.JSONEncoder().encode(credentials))
+            fh_credentials.write(json.dumps(credentials))
 
     def get_credentials(self):
         try:
