@@ -29,7 +29,7 @@ class fsgolib(object):
         except IOError:
             pass
         self.http_session.cookies = self.cookie_jar
-        self.heartbeat = self.heartbeat()
+        self.valid_session = self.heartbeat()
 
     class LoginFailure(Exception):
         def __init__(self, value):

@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <addon id="plugin.video.fsgo"
-       version="1.1.0"
+       version="1.1.1"
        name="FOX Sports GO"
        provider-name="emilsvennesson">
   <requires>
@@ -14,9 +14,7 @@
   </extension>
   <extension point="xbmc.addon.metadata">
     <description lang="en">Watch live sports and shows from FOX Sports GO.[CR][CR]Please note that this add-on requires you to have a subscription to one of FOX Sports GO's participating TV providers.</description>
-    <news>2016.10.16 v1.1.0
-    + Initial stable release.
-    + Thanks to MetalChris for helping out with the icon!</news>
+    <news>2016.10.24 v1.1.1[CR]+ Ensure our session is always valid (heartbeat)[CR]+ Various small fixes</news>
     <platform>all</platform>
     <license>GNU GENERAL PUBLIC LICENSE. Version 3, 29 June 2007</license>
     <source>https://github.com/emilsvennesson/kodi-fsgo</source>

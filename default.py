@@ -375,6 +375,6 @@ def router(paramstring):
 
 
 if __name__ == '__main__':
-    if not fsgo.heartbeat:
+    if not fsgo.valid_session:
         authenticate()
     router(sys.argv[2][1:])  # trim the leading '?' from the plugin call paramstring
