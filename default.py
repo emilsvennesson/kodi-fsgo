@@ -46,7 +46,8 @@ fsgo = fsgolib(cookie_file, credentials_file, debug, verify_ssl)
 
 def addon_log(string):
     if debug:
-        xbmc.log('%s: %s' % (logging_prefix, string))
+        msg = '%s: %s' % (logging_prefix, string)
+        xbmc.log(msg=msg, level=xbmc.LOGDEBUG)
 
 
 def play_video(channel_id, airing_id):
