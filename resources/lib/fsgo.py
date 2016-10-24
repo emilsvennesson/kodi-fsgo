@@ -29,6 +29,7 @@ class fsgolib(object):
         except IOError:
             pass
         self.http_session.cookies = self.cookie_jar
+        self.heartbeat = self.heartbeat()
 
     class LoginFailure(Exception):
         def __init__(self, value):
@@ -112,6 +113,8 @@ class fsgolib(object):
 
     def register_session(self):
         """Register FS GO session. Write session_id and authentication header to file."""
+        utcnow = datetime.utcnow()
+        heartbeat = utcnow.isoformat()
         url = self.base_url + '/sessions/registered'
         session = {}
         session['device'] = {}
@@ -139,7 +142,7 @@ class fsgolib(object):
         else:
             session_id = session_dict['id']
             auth_header = req.headers['Authorization']
-            self.save_credentials(session_id, auth_header)
+            self.save_credentials(session_id=session_id, auth_header=auth_header, heartbeat=heartbeat, logged_in=True)
             self.log('Successfully registered session.')
             return True
 
@@ -174,7 +177,7 @@ class fsgolib(object):
         else:
             return False
 
-    def save_credentials(self, session_id=None, auth_header=None, access_token=None):
+    def save_credentials(self, session_id=None, auth_header=None, access_token=None, heartbeat=None, logged_in=False):
         credentials = {}
         if not session_id:
             session_id = self.get_credentials()['session_id']
@@ -182,19 +185,28 @@ class fsgolib(object):
             auth_header = self.get_credentials()['auth_header']
         if not access_token:
             access_token = self.get_credentials()['access_token']
+        if not heartbeat:
+            heartbeat = self.get_credentials()['heartbeat']
+        if not logged_in:
+            logged_in = self.get_credentials()['logged_in']
 
         credentials['session_id'] = session_id
         credentials['auth_header'] = auth_header
         credentials['access_token'] = access_token
+        credentials['heartbeat'] = heartbeat
+        credentials['logged_in'] = logged_in
 
         with open(self.credentials_file, 'w') as fh_credentials:
             fh_credentials.write(json.dumps(credentials))
 
     def reset_credentials(self):
         credentials = {}
+        utcnow = datetime.utcnow()
         credentials['session_id'] = None
         credentials['auth_header'] = None
         credentials['access_token'] = None
+        credentials['heartbeat'] = utcnow.isoformat()
+        credentials['logged_in'] = False
 
         with open(self.credentials_file, 'w') as fh_credentials:
             fh_credentials.write(json.dumps(credentials))
@@ -207,21 +219,45 @@ class fsgolib(object):
             self.reset_credentials()
             with open(self.credentials_file, 'r') as fh_credentials:
                 return json.loads(fh_credentials.read())
+                
+    def heartbeat(self):
+        """Keep our authentication tokens valid by re-registring every 12 hours."""
+        try:
+            utcnow = datetime.utcnow()
+            last_heartbeat = self.parse_datetime(self.get_credentials()['heartbeat'])
+            next_heartbeat = last_heartbeat + timedelta(hours=12)
+            next_heartbeat = next_heartbeat.replace(tzinfo=None)
+            if utcnow > next_heartbeat and self.get_credentials()['logged_in']:
+                self.login(heartbeat=True)
+                return True
+            elif self.get_credentials()['logged_in']:
+                return True
+            else:
+                return False
+        except KeyError:  # legacy code to reset old credentials structure
+            self.reset_credentials()
+            return False
+        except self.LoginFailure as error:
+            self.log('heartbeat login error: %s' % error.value)
+            return False
 
-    def login(self, reg_code=None):
+    def login(self, reg_code=None, heartbeat=False):
         """Complete login process. Errors are raised as LoginFailure."""
         credentials = self.get_credentials()
         if credentials['session_id'] and credentials['auth_header']:
-            if self.refresh_session():
-                self.log('Session is still valid.')
+            if not heartbeat:
+                if self.refresh_session():
+                    self.log('Session is still valid.')
+                else:
+                    self.log('Session has expired.')
+                    if not self.register_session():
+                        self.log('Unable to re-register to FS GO. Re-authentication is needed.')
+                        self.reset_credentials()
             else:
-                self.log('Session has expired.')
                 if not self.register_session():
                     self.log('Unable to re-register to FS GO. Re-authentication is needed.')
                     self.reset_credentials()
                     raise self.LoginFailure('AuthRequired')
-                else:
-                    self.log('Successfully re-registered to FS GO.')
         else:
             if reg_code:
                 self.log('Not (yet) logged in.')

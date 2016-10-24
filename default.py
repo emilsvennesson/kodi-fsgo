@@ -63,6 +63,7 @@ def play_video(channel_id, airing_id):
 
 
 def main_menu():
+    addon_log('Hello World!')  # print add-on version
     items = [language(30023), language(30015), language(30026), language(30036), language(30030)]
     for item in items:
         if item == language(30023):
@@ -327,25 +328,23 @@ def add_item(title, parameters, items=False, folder=True, playable=False, set_in
         items.append((recursive_url, listitem, folder))
         return items
 
-
-def init(reg_code=None):
+                
+def authenticate(reg_code=None):
     try:
         fsgo.login(reg_code)
-        main_menu()
-        addon_log('Init successful!')
     except fsgo.LoginFailure as error:
         if error.value == 'NoRegCode' or error.value == 'AuthRequired':
             reg_code = fsgo.get_reg_code()
             info_message = '%s[B]%s[/B] [CR][CR]%s' % (language(30010), reg_code, language(30011))
             ok = show_dialog('yesno', language(30009), message=info_message, nolabel=language(30028), yeslabel=language(30027))
             if ok:
-                init(reg_code)
+                authenticate(reg_code)
             else:
                 sys.exit(0)
         elif error.value == 'AuthFailure':
             try_again = show_dialog('yesno', language(30012), message=language(30013), nolabel=language(30028), yeslabel=language(30029))
             if try_again:
-                init()
+                authenticate()
             else:
                 sys.exit(0)
 
@@ -369,8 +368,10 @@ def router(paramstring):
         elif params['action'] == 'show_dialog':
             show_dialog(params['dialog_type'], params['heading'], params['message'])
     else:
-        init()
+        main_menu()
 
 
 if __name__ == '__main__':
+    if not fsgo.heartbeat:
+        authenticate()
     router(sys.argv[2][1:])  # trim the leading '?' from the plugin call paramstring
