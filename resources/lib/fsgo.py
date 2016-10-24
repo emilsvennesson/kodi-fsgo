@@ -219,7 +219,7 @@ class fsgolib(object):
             self.reset_credentials()
             with open(self.credentials_file, 'r') as fh_credentials:
                 return json.loads(fh_credentials.read())
-                
+
     def heartbeat(self):
         """Keep our authentication tokens valid by re-registring every 12 hours."""
         try:
