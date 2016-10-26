@@ -123,7 +123,6 @@ class fsgolib(object):
         session['location']['latitude'] = '0'  # unsure if this needs to be set
         session['location']['longitude'] = '0'  # unsure if this needs to be set
         post_data = json.dumps(session)
-
         headers = {
             'Accept': 'application/vnd.session-service+json; version=1',
             'Content-Type': 'application/vnd.session-service+json; version=1'
@@ -156,8 +155,10 @@ class fsgolib(object):
             'Content-Type': 'application/vnd.session-service+json; version=1',
             'Authorization': self.get_credentials()['auth_header']
         }
+
         req = self.make_request(url=url, method='put', headers=headers, return_req=True)
         session_data = req.content
+ 
         try:
             session_dict = json.loads(session_data)
         except ValueError:
@@ -230,23 +231,29 @@ class fsgolib(object):
                 return json.loads(fh_credentials.read())
 
     def heartbeat(self):
-        """Keep session valid by re-registring/resetting credentials when session/registration expires."""
+        """Return whether credentials are valid or not. Refresh registration if needed."""
         try:
             utcnow = datetime.utcnow()
             session_expires = self.parse_datetime(self.get_credentials()['session_expires'])
             session_expires = session_expires.replace(tzinfo=None)
             reg_expires = self.parse_datetime(self.get_credentials()['reg_expires'])
             reg_expires = reg_expires.replace(tzinfo=None)
-            if utcnow >= reg_expires and self.get_credentials()['logged_in']:
-                self.reset_credentials()
-                return False
-            elif utcnow >= session_expires and self.get_credentials()['logged_in']:
-                self.login(heartbeat=True)
-                return True
-            elif self.get_credentials()['logged_in']:
-                return True
+
+            reg_needed = utcnow >= session_expires
+            reg_valid = reg_expires >= utcnow
+
+            if reg_valid:
+                if reg_needed:
+                    self.login(heartbeat=True)
+                    return True
+                elif self.get_credentials()['logged_in']:
+                    return True
+                else:
+                    return False
             else:
+                self.log('Registration token has expired. Re-authentication needed.')
                 return False
+
         except KeyError:  # legacy code to reset old credentials structure
             self.reset_credentials()
             return False
@@ -266,6 +273,7 @@ class fsgolib(object):
                     if not self.register_session():
                         self.log('Unable to re-register to FS GO. Re-authentication is needed.')
                         self.reset_credentials()
+                        raise self.LoginFailure('AuthRequired')
             else:
                 if not self.register_session():
                     self.log('Unable to re-register to FS GO. Re-authentication is needed.')
@@ -288,14 +296,15 @@ class fsgolib(object):
     def get_stream_url(self, channel_id, airing_id=None):
         """Return the stream URL for an event."""
         stream_url = {}
+        url = self.base_url + '/platform/ios-tablet~3.0.3/channel/%s' % channel_id
         if airing_id:
-            url = self.base_url + '/platform/ios-tablet~3.0.3/channel/%s/airing/%s' % (channel_id, airing_id)
-        else:
-            url = self.base_url + '/platform/ios-tablet~3.0.3/channel/%s' % channel_id
+            url = url + '/airing/%s' % airing_id
+
         headers = {
             'Accept': 'application/vnd.media-service+json; version=1',
             'Authorization': self.get_credentials()['auth_header']
         }
+
         stream_data = self.make_request(url=url, method='get', headers=headers)
         stream_dict = json.loads(stream_data)
         if 'errors' in stream_dict.keys():
