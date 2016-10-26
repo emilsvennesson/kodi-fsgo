@@ -114,7 +114,6 @@ class fsgolib(object):
     def register_session(self):
         """Register FS GO session. Write session_id and authentication header to file."""
         utcnow = datetime.utcnow()
-        heartbeat = utcnow.isoformat()
         url = self.base_url + '/sessions/registered'
         session = {}
         session['device'] = {}
