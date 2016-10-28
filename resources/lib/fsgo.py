@@ -231,7 +231,7 @@ class fsgolib(object):
                 return json.loads(fh_credentials.read())
 
     def heartbeat(self):
-        """Return whether credentials are valid or not. Refresh registration if needed."""
+        """Return whether credentials are valid or not."""
         try:
             utcnow = datetime.utcnow()
             session_expires = self.parse_datetime(self.get_credentials()['session_expires'])
@@ -241,49 +241,32 @@ class fsgolib(object):
 
             reg_needed = utcnow >= session_expires
             reg_valid = reg_expires >= utcnow
-
-            if reg_valid:
-                if reg_needed:
-                    self.login(heartbeat=True)
-                    return True
-                elif self.get_credentials()['logged_in']:
-                    return True
-                else:
-                    return False
+            
+            if self.get_credentials()['logged_in'] and reg_valid and not reg_needed:
+                return True
             else:
-                self.log('Registration token has expired. Re-authentication needed.')
                 return False
 
         except KeyError:  # legacy code to reset old credentials structure
             self.reset_credentials()
             return False
-        except self.LoginFailure as error:
-            self.log('heartbeat login error: %s' % error.value)
-            return False
 
-    def login(self, reg_code=None, heartbeat=False):
+    def login(self, reg_code=None):
         """Complete login process. Errors are raised as LoginFailure."""
         credentials = self.get_credentials()
         if credentials['session_id'] and credentials['auth_header']:
-            if not heartbeat:
-                if self.refresh_session():
-                    self.log('Session is still valid.')
-                else:
-                    self.log('Session has expired.')
-                    if not self.register_session():
-                        self.log('Unable to re-register to FS GO. Re-authentication is needed.')
-                        self.reset_credentials()
-                        raise self.LoginFailure('AuthRequired')
+            if self.refresh_session():
+                self.log('Session is still valid.')
             else:
+                self.log('Session has expired.')
                 if not self.register_session():
-                    self.log('Unable to re-register to FS GO. Re-authentication is needed.')
                     self.reset_credentials()
-                    raise self.LoginFailure('AuthRequired')
+                    raise self.LoginFailure('RegFailure')
         else:
             if reg_code:
                 self.log('Not (yet) logged in.')
                 if not self.get_access_token(reg_code):
-                    raise self.LoginFailure('AuthFailure')
+                    raise self.LoginFailure('ProviderLoginFailure')
                 else:
                     if not self.register_session():
                         raise self.LoginFailure('RegFailure')
@@ -291,7 +274,7 @@ class fsgolib(object):
                         self.log('Login was successful.')
             else:
                 self.log('No registration code supplied.')
-                raise self.LoginFailure('NoRegCode')
+                raise self.LoginFailure('NoRegCodeSupplied')
 
     def get_stream_url(self, channel_id, airing_id=None):
         """Return the stream URL for an event."""

@@ -334,7 +334,7 @@ def authenticate(reg_code=None):
     try:
         fsgo.login(reg_code)
     except fsgo.LoginFailure as error:
-        if error.value == 'NoRegCode' or error.value == 'AuthRequired':
+        if error.value == 'NoRegCodeSupplied' or error.value == 'RegFailure':
             reg_code = fsgo.get_reg_code()
             info_message = '%s[B]%s[/B] [CR][CR]%s' % (language(30010), reg_code, language(30011))
             ok = dialog('yesno', language(30009), message=info_message, nolabel=language(30028),
@@ -343,7 +343,7 @@ def authenticate(reg_code=None):
                 authenticate(reg_code)
             else:
                 sys.exit(0)
-        elif error.value == 'AuthFailure':
+        elif error.value == 'ProviderLoginFailure':
             try_again = dialog('yesno', language(30012), message=language(30013), nolabel=language(30028),
                                yeslabel=language(30029))
             if try_again:
