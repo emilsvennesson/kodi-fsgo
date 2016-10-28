@@ -203,7 +203,6 @@ def show_auth_details():
         confirm_log_out = dialog('yesno', language(30034), message=language(30035))
         if confirm_log_out:
             fsgo.reset_credentials()
-            sys.exit(0)
 
 
 def list_upcoming_days():
@@ -336,7 +335,7 @@ def authenticate(reg_code=None):
     except fsgo.LoginFailure as error:
         if error.value == 'NoRegCodeSupplied' or error.value == 'RegFailure':
             reg_code = fsgo.get_reg_code()
-            info_message = '%s[B]%s[/B] [CR][CR]%s' % (language(30010), reg_code, language(30011))
+            info_message = '%s [B]%s[/B] [CR][CR]%s' % (language(30010), reg_code, language(30011))
             ok = dialog('yesno', language(30009), message=info_message, nolabel=language(30028),
                         yeslabel=language(30027))
             if ok:
