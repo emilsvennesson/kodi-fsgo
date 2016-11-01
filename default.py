@@ -6,6 +6,7 @@ import sys
 import os
 import urllib
 import urlparse
+import json
 from datetime import datetime
 
 from resources.lib.fsgo import fsgolib
@@ -27,19 +28,20 @@ if not xbmcvfs.exists(addon_profile):
 
 _url = sys.argv[0]  # get the plugin url in plugin:// notation
 _handle = int(sys.argv[1])  # get the plugin handle as an integer number
-
 cookie_file = os.path.join(addon_profile, 'cookie_file')
 credentials_file = os.path.join(addon_profile, 'credentials')
-
-if addon.getSetting('debug') == 'false':
-    debug = False
-else:
-    debug = True
-
 if addon.getSetting('verify_ssl') == 'false':
     verify_ssl = False
 else:
     verify_ssl = True
+debug_cmd = {  # determine if debug logging is activated in kodi
+    'jsonrpc': '2.0',
+    'method': 'Settings.GetSettingValue',
+    'params': {'setting': 'debug.showloginfo'},
+    'id': '1'
+    }
+debug_dict = json.loads(xbmc.executeJSONRPC(json.dumps(debug_cmd)))
+debug = debug_dict['result']['value']
 
 fsgo = fsgolib(cookie_file, credentials_file, debug, verify_ssl)
 
