@@ -35,11 +35,11 @@ if addon.getSetting('verify_ssl') == 'false':
 else:
     verify_ssl = True
 debug_cmd = {  # determine if debug logging is activated in kodi
-    'jsonrpc': '2.0',
-    'method': 'Settings.GetSettingValue',
-    'params': {'setting': 'debug.showloginfo'},
-    'id': '1'
-    }
+               'jsonrpc': '2.0',
+               'method': 'Settings.GetSettingValue',
+               'params': {'setting': 'debug.showloginfo'},
+               'id': '1'
+               }
 debug_dict = json.loads(xbmc.executeJSONRPC(json.dumps(debug_cmd)))
 debug = debug_dict['result']['value']
 
@@ -70,25 +70,25 @@ def main_menu():
     items = [language(30023), language(30015), language(30026), language(30036), language(30030)]
     for item in items:
         if item == language(30023):
-            parameters = {
+            params = {
                 'action': 'list_events_by_date',
                 'schedule_type': 'all',
                 'filter_date': 'today'
             }
         elif item == language(30015):
-            parameters = {'action': 'list_upcoming_days'}
+            params = {'action': 'list_upcoming_days'}
         elif item == language(30026):
-            parameters = {
+            params = {
                 'action': 'list_events',
                 'schedule_type': 'featured'
             }
         elif item == language(30036):
-            parameters = {'action': 'search'}
+            params = {'action': 'search'}
         else:  # auth details
             item = '[B]%s[/B]' % item
-            parameters = {'action': 'show_auth_details'}
+            params = {'action': 'show_auth_details'}
 
-        add_item(item, parameters)
+        add_item(item, params)
     xbmcplugin.endOfDirectory(_handle)
 
 
@@ -111,7 +111,8 @@ def list_events(schedule_type, filter_date=False, search_query=None):
     now = datetime.now()
     date_today = now.date()
 
-    schedule = fsgo.get_schedule(schedule_type, filter_date=filter_date, deportes=addon.getSetting('show_deportes'), search_query=search_query)
+    schedule = fsgo.get_schedule(schedule_type, filter_date=filter_date, deportes=addon.getSetting('show_deportes'),
+                                 search_query=search_query)
 
     for event in schedule:
         channel_id = event['airings'][0]['channel_id']
@@ -136,7 +137,7 @@ def list_events(schedule_type, filter_date=False, search_query=None):
             start_time = '%s %s' % (airing_date_obj.strftime('%Y-%m-%d'), time)
 
         if event['airings'][0]['is_live']:
-            parameters = {
+            params = {
                 'action': 'play_event',
                 'channel_id': channel_id,
                 'airing_id': airing_id
@@ -145,7 +146,7 @@ def list_events(schedule_type, filter_date=False, search_query=None):
             date_color = 'live'
         else:
             message = '%s [B]%s[/B].' % (language(30024), start_time)
-            parameters = {
+            params = {
                 'action': 'dialog',
                 'dialog_type': 'ok',
                 'heading': language(30025),
@@ -169,7 +170,7 @@ def list_events(schedule_type, filter_date=False, search_query=None):
         context_menu = {
             'title': language(30038),
             'function': 'RunPlugin',
-            '_url':_url + '?' + urllib.urlencode(fav_params)
+            '_url': _url + '?' + urllib.urlencode(fav_params)
         }
 
         try:
@@ -191,7 +192,7 @@ def list_events(schedule_type, filter_date=False, search_query=None):
         if event['airings'][0]['replay']:
             list_title = '%s [B]%s[/B]' % (list_title, coloring('(R)', 'replay'))
 
-        items = add_item(list_title, parameters, items=items, playable=playable, set_art=art,
+        items = add_item(list_title, params, items=items, playable=playable, set_art=art,
                          set_info=info, context_menu=context_menu)
     xbmcplugin.addDirectoryItems(_handle, items, len(items))
     xbmcplugin.endOfDirectory(_handle)
@@ -199,9 +200,8 @@ def list_events(schedule_type, filter_date=False, search_query=None):
 
 def show_auth_details():
     auth_details = fsgo.refresh_session()['user']['registration']
-
     tv_provider = auth_details['auth_provider']
-    entitlements = ', '.join(auth_details['entitlements'])
+    entitlements = ', '.join(sorted(auth_details['entitlements']))
     expiration_date_obj = fsgo.parse_datetime(auth_details['expires_on'], localize=True)
     if addon.getSetting('time_notation') == '0':  # 12 hour clock
         expiration_date = expiration_date_obj.strftime('%Y-%m-%d %I:%M %p')
@@ -228,13 +228,13 @@ def list_upcoming_days():
     for date in event_dates:
         if date > date_today:
             title = date.strftime('%Y-%m-%d')
-            parameters = {
+            params = {
                 'action': 'list_events_by_date',
                 'schedule_type': 'all',
                 'filter_date': date
             }
 
-            add_item(title, parameters)
+            add_item(title, params)
     xbmcplugin.endOfDirectory(_handle)
 
 
@@ -316,7 +316,7 @@ def search():
         addon_log('No search query provided.')
 
 
-def add_item(title, parameters, items=False, folder=True, playable=False, set_info=False, set_art=False,
+def add_item(title, params, items=False, folder=True, playable=False, set_info=False, set_art=False,
              watched=False, set_content=False, context_menu=None):
     listitem = xbmcgui.ListItem(label=title)
     if playable:
@@ -338,7 +338,7 @@ def add_item(title, parameters, items=False, folder=True, playable=False, set_in
         listitem.addContextMenuItems([(context_menu['title'], run)])
 
     listitem.setContentLookup(False)  # allows sending custom headers/cookies to ffmpeg
-    recursive_url = _url + '?' + urllib.urlencode(parameters)
+    recursive_url = _url + '?' + urllib.urlencode(params)
 
     if items is False:
         xbmcplugin.addDirectoryItem(_handle, recursive_url, listitem, folder)
@@ -348,19 +348,20 @@ def add_item(title, parameters, items=False, folder=True, playable=False, set_in
 
 
 def channel_to_favourites(channel_name, channel_id):
-    parameters = {
+    params = {
         'action': 'play_channel',
         'channel_id': channel_id,
     }
+
     cmd = {
-    'jsonrpc': '2.0',
-    'method': 'Favourites.AddFavourite',
-    'params': {
-        'title': channel_name,
-        'type': 'media',
-        'path': _url + '?' + urllib.urlencode(parameters)
-    },
-    'id': '1'
+        'jsonrpc': '2.0',
+        'method': 'Favourites.AddFavourite',
+        'params': {
+            'title': channel_name,
+            'type': 'media',
+            'path': _url + '?' + urllib.urlencode(params)
+        },
+        'id': '1'
     }
 
     debug_dict = json.loads(xbmc.executeJSONRPC(json.dumps(cmd)))
@@ -416,6 +417,6 @@ def router(paramstring):
 
 
 if __name__ == '__main__':
-    if not fsgo.logged_in:
+    if not fsgo.valid_session:
         authenticate()
     router(sys.argv[2][1:])  # trim the leading '?' from the plugin call paramstring

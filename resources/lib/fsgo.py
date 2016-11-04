@@ -29,7 +29,7 @@ class fsgolib(object):
         except IOError:
             pass
         self.http_session.cookies = self.cookie_jar
-        self.logged_in = self.heartbeat()
+        self.valid_session = self.heartbeat()
 
     class LoginFailure(Exception):
         def __init__(self, value):
@@ -143,7 +143,8 @@ class fsgolib(object):
             auth_header = req.headers['Authorization']
             session_expires = session_dict['expires_on']
             reg_expires = session_dict['user']['registration']['expires_on']
-            self.save_credentials(session_id=session_id, auth_header=auth_header, session_expires=session_expires, reg_expires=reg_expires, logged_in=True)
+            self.save_credentials(session_id=session_id, auth_header=auth_header, session_expires=session_expires,
+                                  reg_expires=reg_expires, logged_in=True)
             self.log('Successfully registered session.')
             return True
 
@@ -158,32 +159,27 @@ class fsgolib(object):
 
         req = self.make_request(url=url, method='put', headers=headers, return_req=True)
         session_data = req.content
- 
-        try:
-            session_dict = json.loads(session_data)
-        except ValueError:
-            session_dict = None
+        session_dict = json.loads(session_data)
 
-        if session_dict:
-            if 'errors' in session_dict.keys():
-                errors = []
-                for error in session_dict['errors']:
-                    errors.append(error)
-                errors = ', '.join(errors)
-                self.log('Unable to refresh session. Error(s): %s' % errors)
-                self.save_credentials(logged_in=False)
-                return False
-            else:
-                session_id = session_dict['id']
-                auth_header = req.headers['Authorization']
-                session_expires = session_dict['expires_on']
-                reg_expires = session_dict['user']['registration']['expires_on']
-                self.save_credentials(session_id=session_id, auth_header=auth_header, session_expires=session_expires, reg_expires=reg_expires, logged_in=True)
-                return session_dict
-        else:
+        if 'errors' in session_dict.keys():
+            errors = []
+            for error in session_dict['errors']:
+                errors.append(error)
+            errors = ', '.join(errors)
+            self.log('Unable to refresh session. Error(s): %s' % errors)
+            self.save_credentials(logged_in=False)
             return False
+        else:
+            session_id = session_dict['id']
+            auth_header = req.headers['Authorization']
+            session_expires = session_dict['expires_on']
+            reg_expires = session_dict['user']['registration']['expires_on']
+            self.save_credentials(session_id=session_id, auth_header=auth_header, session_expires=session_expires,
+                                  reg_expires=reg_expires, logged_in=True)
+            return session_dict
 
-    def save_credentials(self, session_id=None, auth_header=None, access_token=None, session_expires=None, reg_expires=None, logged_in=False):
+    def save_credentials(self, session_id=None, auth_header=None, access_token=None, session_expires=None,
+                         reg_expires=None, logged_in=False):
         credentials = {}
         if not session_id:
             session_id = self.get_credentials()['session_id']
@@ -241,7 +237,7 @@ class fsgolib(object):
 
             reg_needed = utcnow >= session_expires
             reg_valid = reg_expires >= utcnow
-            
+
             if self.get_credentials()['logged_in'] and reg_valid and not reg_needed:
                 return True
             else:
@@ -318,7 +314,8 @@ class fsgolib(object):
 
         return streams
 
-    def get_schedule(self, schedule_type, start_date=None, end_date=None, filter_date=False, deportes='true', search_query=None):
+    def get_schedule(self, schedule_type, start_date=None, end_date=None, filter_date=False, deportes='true',
+                     search_query=None):
         """Retrieve the FS GO schedule in a dict."""
         if schedule_type == 'live':
             url = self.base_url + '/epg/ws/live/all'
@@ -359,7 +356,8 @@ class fsgolib(object):
                 date_today = now.date()
                 date_to_filter = date_today
             else:
-                filter_date_obj = datetime(*(time.strptime(filter_date, '%Y-%m-%d')[0:6]))  # http://forum.kodi.tv/showthread.php?tid=112916
+                filter_date_obj = datetime(
+                    *(time.strptime(filter_date, '%Y-%m-%d')[0:6]))  # http://forum.kodi.tv/showthread.php?tid=112916
                 date_to_filter = filter_date_obj.date()
             for event in schedule:
                 event_datetime_obj = self.parse_datetime(event['airings'][0]['airing_date'], localize=True)
