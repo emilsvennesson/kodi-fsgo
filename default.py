@@ -52,7 +52,7 @@ def addon_log(string):
         xbmc.log(msg=msg, level=xbmc.LOGDEBUG)
 
 
-def play_video(channel_id, airing_id):
+def play(channel_id, airing_id=None):
     stream_url = fsgo.get_stream_url(channel_id, airing_id)
     if stream_url:
         bitrate = select_bitrate(stream_url['bitrates'].keys())
@@ -137,7 +137,7 @@ def list_events(schedule_type, filter_date=False, search_query=None):
 
         if event['airings'][0]['is_live']:
             parameters = {
-                'action': 'play_video',
+                'action': 'play_event',
                 'channel_id': channel_id,
                 'airing_id': airing_id
             }
@@ -160,6 +160,18 @@ def list_events(schedule_type, filter_date=False, search_query=None):
             'genre': sport_tag
         }
 
+        fav_params = {
+            'action': 'channel_to_favourites',
+            'channel_name': channel_name,
+            'channel_id': channel_id
+        }
+
+        context_menu = {
+            'title': language(30038),
+            'function': 'RunPlugin',
+            '_url':_url + '?' + urllib.urlencode(fav_params)
+        }
+
         try:
             event_images = event['urls']
             highest_res = 0
@@ -179,7 +191,8 @@ def list_events(schedule_type, filter_date=False, search_query=None):
         if event['airings'][0]['replay']:
             list_title = '%s [B]%s[/B]' % (list_title, coloring('(R)', 'replay'))
 
-        items = add_item(list_title, parameters, items=items, playable=playable, set_art=art, set_info=info)
+        items = add_item(list_title, parameters, items=items, playable=playable, set_art=art,
+                         set_info=info, context_menu=context_menu)
     xbmcplugin.addDirectoryItems(_handle, items, len(items))
     xbmcplugin.endOfDirectory(_handle)
 
@@ -304,7 +317,7 @@ def search():
 
 
 def add_item(title, parameters, items=False, folder=True, playable=False, set_info=False, set_art=False,
-             watched=False, set_content=False):
+             watched=False, set_content=False, context_menu=None):
     listitem = xbmcgui.ListItem(label=title)
     if playable:
         listitem.setProperty('IsPlayable', 'true')
@@ -320,6 +333,9 @@ def add_item(title, parameters, items=False, folder=True, playable=False, set_in
         listitem.addStreamInfo('video', {'duration': 0})
     if set_content:
         xbmcplugin.setContent(_handle, set_content)
+    if context_menu:
+        run = '%s(%s)' % (context_menu['function'], context_menu['_url'])
+        listitem.addContextMenuItems([(context_menu['title'], run)])
 
     listitem.setContentLookup(False)  # allows sending custom headers/cookies to ffmpeg
     recursive_url = _url + '?' + urllib.urlencode(parameters)
@@ -329,6 +345,26 @@ def add_item(title, parameters, items=False, folder=True, playable=False, set_in
     else:
         items.append((recursive_url, listitem, folder))
         return items
+
+
+def channel_to_favourites(channel_name, channel_id):
+    parameters = {
+        'action': 'play_channel',
+        'channel_id': channel_id,
+    }
+    cmd = {
+    'jsonrpc': '2.0',
+    'method': 'Favourites.AddFavourite',
+    'params': {
+        'title': channel_name,
+        'type': 'media',
+        'path': _url + '?' + urllib.urlencode(parameters)
+    },
+    'id': '1'
+    }
+
+    debug_dict = json.loads(xbmc.executeJSONRPC(json.dumps(cmd)))
+    addon_log('channel_to_favourites response: %s' % debug_dict)
 
 
 def authenticate(reg_code=None):
@@ -357,8 +393,10 @@ def router(paramstring):
     """Router function that calls other functions depending on the provided paramstring."""
     params = dict(urlparse.parse_qsl(paramstring))
     if params:
-        if params['action'] == 'play_video':
-            play_video(params['channel_id'], params['airing_id'])
+        if params['action'] == 'play_event':
+            play(params['channel_id'], params['airing_id'])
+        if params['action'] == 'play_channel':
+            play(params['channel_id'])
         elif params['action'] == 'list_events':
             list_events(params['schedule_type'])
         elif params['action'] == 'list_events_by_date':
@@ -371,6 +409,8 @@ def router(paramstring):
             search()
         elif params['action'] == 'dialog':
             dialog(params['dialog_type'], params['heading'], params['message'])
+        elif params['action'] == 'channel_to_favourites':
+            channel_to_favourites(params['channel_name'], params['channel_id'])
     else:
         main_menu()
 

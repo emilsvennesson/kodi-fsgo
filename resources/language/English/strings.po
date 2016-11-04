@@ -94,7 +94,7 @@ msgid "Error"
 msgstr ""
 
 msgctxt "#30021"
-msgid "Unable to find a valid stream URL. Please see the log for more information."
+msgid "An error occurred while attempting to play this channel.[CR][CR]It's possible that the channel is currently off-the-air or that your credentials have expired."
 msgstr ""
 
 msgctxt "#30022"
@@ -159,4 +159,8 @@ msgstr ""
 
 msgctxt "#30037"
 msgid "Search for an event/program/channel."
+msgstr ""
+
+msgctxt "#30038"
+msgid "Add channel to favourites"
 msgstr ""
