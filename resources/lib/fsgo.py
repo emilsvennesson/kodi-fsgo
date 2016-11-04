@@ -305,10 +305,7 @@ class fsgolib(object):
     def parse_m3u8_manifest(self, manifest_url):
         """Return the stream URL along with its bitrate."""
         streams = {}
-        req = requests.get(manifest_url)
-        m3u8_manifest = req.content
-        self.log('HLS manifest: \n %s' % m3u8_manifest)
-
+        m3u8_manifest = self.make_request(manifest_url, 'get')
         m3u8_header = {'Cookie': 'Authorization=' + self.get_credentials()['auth_header']}
         m3u8_obj = m3u8.loads(m3u8_manifest)
         for playlist in m3u8_obj.playlists:
