@@ -34,14 +34,18 @@ if addon.getSetting('verify_ssl') == 'false':
     verify_ssl = False
 else:
     verify_ssl = True
-debug_cmd = {  # determine if debug logging is activated in kodi
-               'jsonrpc': '2.0',
-               'method': 'Settings.GetSettingValue',
-               'params': {'setting': 'debug.showloginfo'},
-               'id': '1'
-               }
-debug_dict = json.loads(xbmc.executeJSONRPC(json.dumps(debug_cmd)))
-debug = debug_dict['result']['value']
+
+try:
+    debug_cmd = {  # determine if debug logging is activated in kodi
+        'jsonrpc': '2.0',
+        'method': 'Settings.GetSettingValue',
+        'params': {'setting': 'debug.showloginfo'},
+        'id': '1'
+    }
+    debug_dict = json.loads(xbmc.executeJSONRPC(json.dumps(debug_cmd)))
+    debug = debug_dict['result']['value']
+except:
+    debug = True
 
 fsgo = fsgolib(cookie_file, credentials_file, debug, verify_ssl)
 
