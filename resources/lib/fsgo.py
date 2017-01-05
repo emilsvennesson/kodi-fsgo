@@ -108,8 +108,9 @@ class fsgolib(object):
             self.log('Successfully authenticated to TV provider (%s)' % reg_dict['auth_provider_name'])
             return True
         else:
-            self.log('Unable to authenticate to TV provider. Status: %s' % reg_dict['status'])
-            return False
+            status = reg_dict['status']
+            self.log('Unable to authenticate to TV provider. Status: %s' % status)
+            raise self.LoginFailure(status)
 
     def register_session(self):
         """Register FS GO session. Write session_id and authentication header to file."""
@@ -135,7 +136,7 @@ class fsgolib(object):
                 errors.append(error)
             errors = ', '.join(errors)
             self.log('Unable to register session. Error(s): %s' % errors)
-            return False
+            raise self.LoginFailure(errors)
         else:
             session_id = session_dict['id']
             auth_header = req.headers['Authorization']
@@ -165,7 +166,7 @@ class fsgolib(object):
                 errors.append(error)
             errors = ', '.join(errors)
             self.log('Unable to refresh session. Error(s): %s' % errors)
-            return False
+            raise self.LoginFailure(errors)
         else:
             session_id = session_dict['id']
             auth_header = req.headers['Authorization']
@@ -248,23 +249,28 @@ class fsgolib(object):
         """Complete login process. Errors are raised as LoginFailure."""
         credentials = self.get_credentials()
         if credentials['session_id'] and credentials['auth_header']:
-            if self.refresh_session():
+            try:
+                self.refresh_session()
                 self.log('Session is still valid.')
-            else:
-                self.log('Session has expired.')
-                if not self.register_session():
+            except self.LoginFailure as error:
+                if error.value == 'session-expired':
+                    try:
+                        self.register_session()
+                    except self.LoginFailure:
+                        self.reset_credentials()
+                        raise
+                else:
                     self.reset_credentials()
-                    raise self.LoginFailure('RegFailure')
+                    raise
         else:
             if reg_code:
                 self.log('Not (yet) logged in.')
-                if not self.get_access_token(reg_code):
-                    raise self.LoginFailure('ProviderLoginFailure')
-                else:
-                    if not self.register_session():
-                        raise self.LoginFailure('RegFailure')
-                    else:
-                        self.log('Login was successful.')
+                try:
+                    self.get_access_token(reg_code)
+                    self.register_session()
+                except self.LoginFailure:
+                    self.reset_credentials()
+                    raise
             else:
                 self.log('No registration code supplied.')
                 raise self.LoginFailure('NoRegCodeSupplied')

@@ -376,7 +376,7 @@ def authenticate(reg_code=None):
     try:
         fsgo.login(reg_code)
     except fsgo.LoginFailure as error:
-        if error.value == 'NoRegCodeSupplied' or error.value == 'RegFailure':
+        if error.value == 'NoRegCodeSupplied' or error.value == 'device-not-registered':
             reg_code = fsgo.get_reg_code()
             info_message = '%s [B]%s[/B] [CR][CR]%s' % (language(30010), reg_code, language(30011))
             ok = dialog('yesno', language(30009), message=info_message, nolabel=language(30028),
@@ -385,13 +385,16 @@ def authenticate(reg_code=None):
                 authenticate(reg_code)
             else:
                 sys.exit(0)
-        elif error.value == 'ProviderLoginFailure':
+        elif error.value == 'InvalidAuthN':
             try_again = dialog('yesno', language(30012), message=language(30013), nolabel=language(30028),
                                yeslabel=language(30029))
             if try_again:
                 authenticate()
             else:
                 sys.exit(0)
+        else:
+            dialog('ok', language(30020), error.value)
+            sys.exit(0)
 
 
 def router(paramstring):
