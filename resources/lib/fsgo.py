@@ -135,7 +135,6 @@ class fsgolib(object):
                 errors.append(error)
             errors = ', '.join(errors)
             self.log('Unable to register session. Error(s): %s' % errors)
-            self.save_credentials(logged_in=False)
             return False
         else:
             session_id = session_dict['id']
@@ -166,7 +165,6 @@ class fsgolib(object):
                 errors.append(error)
             errors = ', '.join(errors)
             self.log('Unable to refresh session. Error(s): %s' % errors)
-            self.save_credentials(logged_in=False)
             return False
         else:
             session_id = session_dict['id']
