@@ -164,3 +164,7 @@ msgstr ""
 msgctxt "#30038"
 msgid "Add channel to favourites"
 msgstr ""
+
+msgctxt "#30039"
+msgid "Hide replays"
+msgstr ""

@@ -119,6 +119,9 @@ def list_events(schedule_type, filter_date=False, search_query=None):
                                  search_query=search_query)
 
     for event in schedule:
+        if addon.getSetting('hide_replays') == 'true' and event['airings'][0]['replay']:
+            continue
+
         channel_id = event['airings'][0]['channel_id']
         airing_id = event['airings'][0]['airing_id']
         channel_name = event['airings'][0]['channel_name']
