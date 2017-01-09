@@ -168,3 +168,12 @@ msgstr ""
 msgctxt "#30039"
 msgid "Hide replays"
 msgstr ""
+
+msgctxt "#30040"
+msgid "Show all programs/events"
+msgstr ""
+
+msgctxt "#30041"
+msgid "Show events only"
+msgstr ""
+

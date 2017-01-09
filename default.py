@@ -110,13 +110,13 @@ def coloring(text, meaning):
     return colored_text
 
 
-def list_events(schedule_type, filter_date=False, search_query=None):
+def list_events(schedule_type, filter_date=False, search_query=None, search_filter=None):
     items = []
     now = datetime.now()
     date_today = now.date()
 
     schedule = fsgo.get_schedule(schedule_type, filter_date=filter_date, deportes=addon.getSetting('show_deportes'),
-                                 search_query=search_query)
+                                 search_query=search_query, search_filter=search_filter)
 
     for event in schedule:
         if addon.getSetting('hide_replays') == 'true' and event['airings'][0]['replay']:
@@ -318,7 +318,14 @@ def get_user_input(heading):
 def search():
     search_query = get_user_input(language(30037))
     if search_query:
-        list_events('search', search_query=search_query)
+        options = [language(30040), language(30041)]
+        ret = dialog('select', language(30036), options=options)
+        if ret is not None:
+            if ret == 1:
+                search_filter = 'events'
+            else:
+                search_filter = None
+            list_events('search', search_query=search_query, search_filter=search_filter)
     else:
         addon_log('No search query provided.')
 
