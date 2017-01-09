@@ -320,17 +320,17 @@ class fsgolib(object):
 
         return streams
 
-    def get_schedule(self, schedule_type, start_date=None, end_date=None, filter_date=False, deportes='true',
+    def get_schedule(self, schedule_type, start_date=None, end_date=None, size='999', filter_date=False, deportes='true',
                      search_query=None):
         """Retrieve the FS GO schedule in a dict."""
         if schedule_type == 'live':
             url = self.base_url + '/epg/ws/live/all'
             payload = None
         elif schedule_type == 'featured':
-            url = self.base_url + '/epg/ws/featured/all/offset/0/size/50'
+            url = self.base_url + '/epg/ws/featured/all/offset/0/size/%s' % size
             payload = None
         elif schedule_type == 'search':
-            url = self.base_url + '/epg/ws/search/offset/0/size/20'
+            url = self.base_url + '/epg/ws/search/offset/0/size/%s' % size
             payload = {
                 'search_type': 'programs',
                 'search': search_query
