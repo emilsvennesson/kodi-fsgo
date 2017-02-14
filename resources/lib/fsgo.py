@@ -112,7 +112,7 @@ class fsgolib(object):
             return True
         else:
             status = reg_dict['status']
-            self.log('Unable to authenticate to TV provider. Status: %s' % status)
+            self.log('Failed to authenticate to TV provider. Status: %s' % status)
             raise self.LoginFailure(status)
 
     def register_session(self):
@@ -138,7 +138,7 @@ class fsgolib(object):
             for error in session_dict['errors']:
                 errors.append(error)
             errors = ', '.join(errors)
-            self.log('Unable to register session. Error(s): %s' % errors)
+            self.log('Failed to register session. Error(s): %s' % errors)
             raise self.LoginFailure(errors)
         else:
             session_id = session_dict['id']
@@ -168,7 +168,7 @@ class fsgolib(object):
             for error in session_dict['errors']:
                 errors.append(error)
             errors = ', '.join(errors)
-            self.log('Unable to refresh session. Error(s): %s' % errors)
+            self.log('Failed to refresh session. Error(s): %s' % errors)
             raise self.LoginFailure(errors)
         else:
             session_id = session_dict['id']
@@ -297,7 +297,7 @@ class fsgolib(object):
             for error in stream_dict['errors']:
                 errors.append(error)
             errors = ', '.join(errors)
-            self.log('Unable to get stream URL. Error(s): %s' % errors)
+            self.log('Failed to get stream URL. Error(s): %s' % errors)
         else:
             stream_url['manifest'] = stream_dict['stream']['location']
             stream_url['bitrates'] = self.parse_m3u8_manifest(stream_url['manifest'])
