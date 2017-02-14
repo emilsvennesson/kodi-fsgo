@@ -236,10 +236,10 @@ class fsgolib(object):
             reg_expires = self.parse_datetime(self.get_credentials()['reg_expires'])
             reg_expires = reg_expires.replace(tzinfo=None)
 
-            reg_needed = utcnow >= session_expires
+            session_valid = session_expires >= utcnow
             reg_valid = reg_expires >= utcnow
 
-            if self.get_credentials()['logged_in'] and reg_valid and not reg_needed:
+            if self.get_credentials()['logged_in'] and session_valid and reg_valid:
                 return True
             else:
                 return False
@@ -366,8 +366,7 @@ class fsgolib(object):
                 date_today = now.date()
                 date_to_filter = date_today
             else:
-                filter_date_obj = datetime(
-                    *(time.strptime(filter_date, '%Y-%m-%d')[0:6]))  # http://forum.kodi.tv/showthread.php?tid=112916
+                filter_date_obj = datetime(*(time.strptime(filter_date, '%Y-%m-%d')[0:6]))  # http://forum.kodi.tv/showthread.php?tid=112916
                 date_to_filter = filter_date_obj.date()
             for event in schedule:
                 event_datetime_obj = self.parse_datetime(event['airings'][0]['airing_date'], localize=True)
