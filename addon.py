@@ -35,25 +35,12 @@ if addon.getSetting('verify_ssl') == 'false':
 else:
     verify_ssl = True
 
-try:
-    debug_cmd = {  # determine if debug logging is activated in kodi
-        'jsonrpc': '2.0',
-        'method': 'Settings.GetSettingValue',
-        'params': {'setting': 'debug.showloginfo'},
-        'id': '1'
-    }
-    debug_dict = json.loads(xbmc.executeJSONRPC(json.dumps(debug_cmd)))
-    debug = debug_dict['result']['value']
-except:
-    debug = True
-
-fsgo = fsgolib(cookie_file, credentials_file, debug, verify_ssl)
+fsgo = fsgolib(cookie_file, credentials_file, debug=True, verify_ssl=verify_ssl)
 
 
 def addon_log(string):
-    if debug:
-        msg = '%s: %s' % (logging_prefix, string)
-        xbmc.log(msg=msg, level=xbmc.LOGDEBUG)
+    msg = '%s: %s' % (logging_prefix, string)
+    xbmc.log(msg=msg, level=xbmc.LOGDEBUG)
 
 
 def play(channel_id, airing_id=None):
