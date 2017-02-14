@@ -21,5 +21,9 @@
     <forum>http://forum.kodi.tv/showthread.php?tid=293178</forum>
     <language>en</language>
     <disclaimer>This addon is completely unofficial and is not endorsed by FOX in any way.</disclaimer>
+    <assets>
+      <icon>resources/art/icon.png</icon>
+      <fanart>resources/art/fanart.jpg</fanart>
+    </assets>
   </extension>
 </addon>
