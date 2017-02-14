@@ -26,6 +26,7 @@ class fsgolib(object):
         self.cookie_jar = cookielib.LWPCookieJar(os.path.join(self.settings_folder, 'cookie_file'))
         self.credentials_file = os.path.join(settings_folder, 'credentials')
         self.base_url = 'https://media-api.foxsportsgo.com'
+        self.reg_url = 'https://activation-adobe.foxsportsgo.com'
         try:
             self.cookie_jar.load(ignore_discard=True, ignore_expires=True)
         except IOError:
@@ -78,7 +79,7 @@ class fsgolib(object):
 
     def get_reg_code(self):
         """Return an activation code needed to authenticate to TV provider."""
-        url = 'https://activation-adobe.foxsportsgo.com/ws/subscription/flow/foxSportGo.init'
+        url = self.reg_url + '/ws/subscription/flow/foxSportGo.init'
         payload = {
             'env': 'production',
             'request_type': 'new_session',
@@ -92,7 +93,7 @@ class fsgolib(object):
 
     def get_access_token(self, reg_code):
         """Saves an access code needed to register session if TV provider login was successful."""
-        url = 'https://activation-adobe.foxsportsgo.com/ws/subscription/flow/v2_foxSportsGo.validate'
+        url = self.reg_url + '/ws/subscription/flow/v2_foxSportsGo.validate'
         payload = {
             'reg_code': reg_code,
             'env': 'production',
