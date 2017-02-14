@@ -2,6 +2,7 @@
 """
 A Kodi-agnostic library for FOX Sports GO
 """
+import os
 import json
 import codecs
 import cookielib
@@ -17,12 +18,13 @@ import iso8601
 
 
 class fsgolib(object):
-    def __init__(self, cookie_file, credentials_file, debug=False, verify_ssl=True):
+    def __init__(self, settings_folder, debug=False, verify_ssl=True):
         self.debug = debug
         self.verify_ssl = verify_ssl
         self.http_session = requests.Session()
-        self.cookie_jar = cookielib.LWPCookieJar(cookie_file)
-        self.credentials_file = credentials_file
+        self.settings_folder = settings_folder
+        self.cookie_jar = cookielib.LWPCookieJar(os.path.join(self.settings_folder, 'cookie_file'))
+        self.credentials_file = os.path.join(settings_folder, 'credentials')
         self.base_url = 'https://media-api.foxsportsgo.com'
         try:
             self.cookie_jar.load(ignore_discard=True, ignore_expires=True)

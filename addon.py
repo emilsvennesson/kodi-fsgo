@@ -28,14 +28,12 @@ if not xbmcvfs.exists(addon_profile):
 
 _url = sys.argv[0]  # get the plugin url in plugin:// notation
 _handle = int(sys.argv[1])  # get the plugin handle as an integer number
-cookie_file = os.path.join(addon_profile, 'cookie_file')
-credentials_file = os.path.join(addon_profile, 'credentials')
 if addon.getSetting('verify_ssl') == 'false':
     verify_ssl = False
 else:
     verify_ssl = True
 
-fsgo = fsgolib(cookie_file, credentials_file, debug=True, verify_ssl=verify_ssl)
+fsgo = fsgolib(addon_profile, debug=True, verify_ssl=verify_ssl)
 
 
 def addon_log(string):
