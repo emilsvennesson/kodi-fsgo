@@ -1,3 +1,9 @@
+2017.02.14 v1.1.5
++ Update for Krypton
++ Improve search function
++ Improve authentication process
++ Add option to hide replays
+
 2016.11.29 v1.1.4
 + Fix broken stream playback
 

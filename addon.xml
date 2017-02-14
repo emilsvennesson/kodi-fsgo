@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <addon id="plugin.video.fsgo"
-       version="1.1.4"
+       version="1.1.5"
        name="FOX Sports GO"
        provider-name="emilsvennesson">
   <requires>
@@ -14,7 +14,7 @@
   </extension>
   <extension point="xbmc.addon.metadata">
     <description lang="en">Watch live sports and shows from FOX Sports GO.[CR][CR]Please note that this add-on requires you to authenticate to one of FOX Sports GO's participating TV providers.</description>
-    <news>2016.11.29 v1.1.4[CR]+ Fix broken stream playback</news>
+    <news>2017.02.14 v1.1.5[CR]+ Update for Krypton[CR]+ Improve search function[CR]+ Improve authentication process[CR]+ Add option to hide replays</news>
     <platform>all</platform>
     <license>GNU GENERAL PUBLIC LICENSE. Version 3, 29 June 2007</license>
     <source>https://github.com/emilsvennesson/kodi-fsgo</source>
