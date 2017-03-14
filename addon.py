@@ -419,6 +419,6 @@ def router(paramstring):
 
 
 def run():
-    if not fsgo.valid_session:
+    if not fsgo.valid_session():
         authenticate()
     router(sys.argv[2][1:])  # trim the leading '?' from the plugin call paramstring

@@ -32,7 +32,6 @@ class fsgolib(object):
         except IOError:
             pass
         self.http_session.cookies = self.cookie_jar
-        self.valid_session = self.heartbeat()
 
     class LoginFailure(Exception):
         def __init__(self, value):
@@ -227,8 +226,8 @@ class fsgolib(object):
             with open(self.credentials_file, 'r') as fh_credentials:
                 return json.loads(fh_credentials.read())
 
-    def heartbeat(self):
-        """Return whether credentials are valid or not."""
+    def valid_session(self):
+        """Return whether the session is valid or not."""
         try:
             utcnow = datetime.utcnow()
             session_expires = self.parse_datetime(self.get_credentials()['session_expires'])
