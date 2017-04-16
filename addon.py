@@ -150,7 +150,7 @@ def list_events(schedule_type, filter_date=False, search_query=None, search_filt
         }
 
         fav_params = {
-            'action': 'channel_to_favourites',
+            'action': 'channel_to_favs',
             'channel_name': channel_name,
             'channel_id': channel_id
         }
@@ -345,7 +345,7 @@ def add_item(title, params, items=False, folder=True, playable=False, set_info=F
         return items
 
 
-def channel_to_favourites(channel_name, channel_id):
+def channel_to_favs(channel_name, channel_id):
     params = {
         'action': 'play_channel',
         'channel_id': channel_id,
@@ -363,7 +363,7 @@ def channel_to_favourites(channel_name, channel_id):
     }
 
     debug_dict = json.loads(xbmc.executeJSONRPC(json.dumps(cmd)))
-    addon_log('channel_to_favourites response: %s' % debug_dict)
+    addon_log('channel_to_favs response: %s' % debug_dict)
 
 
 def authenticate(reg_code=None):
@@ -411,8 +411,8 @@ def router(paramstring):
             search()
         elif params['action'] == 'dialog':
             dialog(params['dialog_type'], params['heading'], params['message'])
-        elif params['action'] == 'channel_to_favourites':
-            channel_to_favourites(params['channel_name'], params['channel_id'])
+        elif params['action'] == 'channel_to_favs':
+            channel_to_favs(params['channel_name'], params['channel_id'])
     else:
         main_menu()
 
