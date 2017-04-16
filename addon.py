@@ -112,11 +112,7 @@ def list_events(schedule_type, filter_date=False, search_query=None, search_filt
         channel_name = event['airings'][0]['channel_name']
         airing_date_obj = fsgo.parse_datetime(event['airings'][0]['airing_date'], localize=True)
         airing_date = airing_date_obj.date()
-
-        try:
-            sport_tag = event['sport_tag']
-        except KeyError:
-            sport_tag = None
+        sport_tag = event.get('sport_tag')
 
         if addon.getSetting('time_notation') == '0':  # 12 hour clock
             time = airing_date_obj.strftime('%I:%M %p')
