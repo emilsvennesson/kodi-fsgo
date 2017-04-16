@@ -55,6 +55,9 @@ class fsgolib(object):
     def make_request(self, url, method, payload=None, headers=None, return_req=False):
         """Make an HTTP request. Return the response."""
         self.log('Request URL: %s' % url)
+        self.log('Method: %s' % method)
+        self.log('Payload: %s' % payload)
+        self.log('Headers: %s' % headers)
         try:
             if method == 'get':
                 req = self.http_session.get(url, params=payload, headers=headers, allow_redirects=False, verify=self.verify_ssl)
